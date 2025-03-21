@@ -49,7 +49,7 @@ This endpoint registers a new user. It validates the provided data for required 
 - **500 Internal Server Error**: Error during user registration due to server issues.
 - Example: Unexpected error creating the user.
 
-## 2 User Login Endpoint
+# 2 User Login Endpoint
 
 **Endpoint:** `POST /api/v1/user/login`
 
