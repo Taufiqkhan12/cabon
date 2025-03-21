@@ -38,12 +38,6 @@
     "message": "User Registered Successfully"
   }
   ```
-- **400 Bad Request**: Validation error or when required fields are missing.
-- Examples: Missing `firstname`, `email`, or invalid password format.
-- Response contains an error message explaining the issue.
-
-- **500 Internal Server Error**: Error during user registration due to server issues.
-- Example: Unexpected error creating the user.
 
 ---
 
@@ -82,9 +76,60 @@
     "message": "Logged in sucessfully"
   }
   ```
-- **400 Bad Request:**  
-  When required fields are missing.
-- **401 Unauthorized:**  
-  When the email or password is incorrect.
-- **500 Internal Server Error:**  
-  Error during user login due to server issues.
+
+# 3 Get User Profile Endpoint
+
+**Endpoint:** `GET /api/v1/user/profile`
+
+**Authentication:**  
+Requires JWT token in the Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Status Codes:**
+
+- **200 OK:**  
+  Profile fetched successfully.  
+  **Response Example:**
+  ```json
+  {
+    "status": 200,
+    "data": {
+      /* current user details */
+    },
+    "message": "Current user fetched Successfully"
+  }
+  ```
+
+---
+
+# 4. User Logout Endpoint
+
+**Endpoint:** `POST /api/v1/user/logout`
+
+**Authentication:**  
+Requires JWT token either in cookies or Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Status Codes:**
+
+- **200 OK:**  
+  Logout successful.  
+  **Response Example:**
+  ```json
+  {
+    "status": 200,
+    "data": {},
+    "message": "Logged out successfully"
+  }
+  ```
+
+**Notes:**
+
+- The token is blacklisted to prevent reuse
+- Authentication cookie is cleared upon successful logout
