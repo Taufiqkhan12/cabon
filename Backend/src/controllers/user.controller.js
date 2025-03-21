@@ -2,6 +2,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { userRegistrationValidation } from "../validator/user.validator.js";
+import { BlacklistToken } from "../models/blacklistToken.model.js";
 
 const registerUser = async (req, res, next) => {
   try {
@@ -87,8 +88,14 @@ const loginUser = async (req, res, next) => {
 
     const token = userExist.generateAuthToken();
 
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
     return res
       .status(200)
+      .cookie("token", token, options)
       .json(
         new ApiResponse(200, { userExist, token }, "Logged in sucessfully")
       );
@@ -97,4 +104,41 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-export { registerUser, loginUser };
+const getUserProfile = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    if (!currentUser) {
+      throw new ApiError(502, "Failed to get user");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, currentUser, "Current user fetched Successfully")
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const logoutUser = async (req, res, next) => {
+  try {
+    const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+
+    await BlacklistToken.create({ token });
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .clearCookie("token", options)
+      .json(new ApiResponse(200, {}, "Logged out successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { registerUser, loginUser, getUserProfile, logoutUser };

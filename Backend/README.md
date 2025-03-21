@@ -4,10 +4,6 @@
 
 `POST /api/v1/user/register`
 
-## Description
-
-This endpoint registers a new user. It validates the provided data for required fields and proper format before creating the user in the database. On successful registration, the endpoint returns the created user (without password) and an authentication token.
-
 ## Required Data
 
 - **firstname** (string): Required. Must be at least 3 characters long.
@@ -48,6 +44,8 @@ This endpoint registers a new user. It validates the provided data for required 
 
 - **500 Internal Server Error**: Error during user registration due to server issues.
 - Example: Unexpected error creating the user.
+
+---
 
 # 2 User Login Endpoint
 
@@ -90,11 +88,3 @@ This endpoint registers a new user. It validates the provided data for required 
   When the email or password is incorrect.
 - **500 Internal Server Error:**  
   Error during user login due to server issues.
-
----
-
-# Additional Information
-
-- Email addresses are normalized to lowercase before storing.
-- Passwords are securely hashed before being saved in the database.
-- The authentication token returned is a JWT and should be used for subsequent requests that require user authentication.
