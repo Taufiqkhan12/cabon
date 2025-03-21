@@ -65,4 +65,36 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-export { registerUser };
+const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      throw new ApiError(400, "All fields must be filled");
+    }
+
+    const userExist = await User.findOne({ email }).select("+password");
+
+    if (!userExist) {
+      throw new ApiError(401, "Invalid email or password ");
+    }
+
+    const isValid = await userExist.isPasswordCorrect(password);
+
+    if (!isValid) {
+      throw new ApiError(401, "Invalid user credentials");
+    }
+
+    const token = userExist.generateAuthToken();
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, { userExist, token }, "Logged in sucessfully")
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { registerUser, loginUser };

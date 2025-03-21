@@ -1,4 +1,4 @@
-# User Registration Endpoint
+# 1 User Registration Endpoint
 
 ## Endpoint
 
@@ -48,3 +48,53 @@ This endpoint registers a new user. It validates the provided data for required 
 
 - **500 Internal Server Error**: Error during user registration due to server issues.
 - Example: Unexpected error creating the user.
+
+## 2 User Login Endpoint
+
+**Endpoint:** `POST /api/v1/user/login`
+
+**Required Data:**
+
+- **email** (string): Required. Must be a valid email format.
+- **password** (string): Required.
+
+**Example Request Body:**
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "Secure@123"
+}
+```
+
+**Status Codes:**
+
+- **200 OK:**  
+  Login successful.  
+  **Response Example:**
+  ```json
+  {
+    "status": 200,
+    "data": {
+      "userExist": {
+        /* user details */
+      },
+      "token": "jwt_token"
+    },
+    "message": "Logged in sucessfully"
+  }
+  ```
+- **400 Bad Request:**  
+  When required fields are missing.
+- **401 Unauthorized:**  
+  When the email or password is incorrect.
+- **500 Internal Server Error:**  
+  Error during user login due to server issues.
+
+---
+
+# Additional Information
+
+- Email addresses are normalized to lowercase before storing.
+- Passwords are securely hashed before being saved in the database.
+- The authentication token returned is a JWT and should be used for subsequent requests that require user authentication.
