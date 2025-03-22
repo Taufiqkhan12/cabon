@@ -12,6 +12,10 @@ function userRegistrationValidation(data) {
     email: Joi.string().email().required().messages({
       "string.email": "Email must be an valid email",
     }),
+    phone: Joi.string().max(12).required().messages({
+      "string.max": "Phone must be 12 in length",
+      "any.required": " Phone Number is required",
+    }),
     password: Joi.string()
       .pattern(
         new RegExp(

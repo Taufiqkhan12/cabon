@@ -3,12 +3,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { userRegistrationValidation } from "../validator/user.validator.js";
 import { BlacklistToken } from "../models/blacklistToken.model.js";
+import { generateOtp, otpExpiry, sendOtp } from "../utils/utilityFunction.js";
 
 const registerUser = async (req, res, next) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
+    const { firstname, lastname, email, password, phone } = req.body;
 
-    if (!firstname || !email || !password) {
+    if (!firstname || !email || !password || !phone) {
       throw new Error("All fileds are required!");
     }
 
@@ -17,6 +18,7 @@ const registerUser = async (req, res, next) => {
       lastname,
       email,
       password,
+      phone,
     });
 
     if (inputError) {
@@ -32,34 +34,76 @@ const registerUser = async (req, res, next) => {
       throw new ApiError(400, "User with this email already exists");
     }
 
-    const hashedPassword = await User.hashPassword(password);
+    const otp = generateOtp();
+    const expiry = otpExpiry();
 
     const user = await User.create({
       fullname: {
         firstname,
         lastname,
       },
-      lastname,
       email: normalizedEmail,
-      password: hashedPassword,
+      phone,
+      password,
+      otp,
+      otpExpiry: expiry,
     });
 
-    const createdUser = await User.findById(user._id).select("-password ");
+    const createdUser = await User.findById(user._id).select(
+      "-password -refreshToken -otp -otpExpiry"
+    );
 
     if (!createdUser) {
       throw new ApiError(500, "Something went wrong registering the user");
     }
 
-    const token = user.generateAuthToken();
+    await sendOtp(email, otp);
 
-    res
-      .status(201)
+    const accessToken = user.generateAccessToken();
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
       .json(
-        new ApiResponse(
-          201,
-          { createdUser, token },
-          "User Registered Sucessfully"
-        )
+        new ApiResponse(201, { createdUser }, "User Registered Sucessfully")
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verifyEmail = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+
+    if (!otp) {
+      throw new ApiError(400, "Otp is required");
+    }
+
+    const user = req.user;
+
+    if (user.otp !== Number(otp) || user.otpExpiry < Date.now()) {
+      user.otp = undefined;
+      user.otpExpiry = undefined;
+      await user.save();
+
+      throw new ApiError(400, "Invalid or expired verification code");
+    }
+
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, {}, "Your email has been successfully verified")
       );
   } catch (error) {
     next(error);
@@ -74,7 +118,7 @@ const loginUser = async (req, res, next) => {
       throw new ApiError(400, "All fields must be filled");
     }
 
-    const userExist = await User.findOne({ email }).select("+password");
+    const userExist = await User.findOne({ email });
 
     if (!userExist) {
       throw new ApiError(401, "Invalid email or password ");
@@ -86,7 +130,37 @@ const loginUser = async (req, res, next) => {
       throw new ApiError(401, "Invalid user credentials");
     }
 
-    const token = userExist.generateAuthToken();
+    const isVerified = userExist.isVerified;
+
+    if (!isVerified) {
+      const otp = generateOtp();
+      const expiry = otpExpiry();
+      await sendOtp(email, otp);
+
+      userExist.otp = otp;
+      userExist.otpExpiry = expiry;
+      await userExist.save();
+
+      return res
+        .status(403)
+        .json(
+          new ApiResponse(
+            403,
+            { isVerified, email },
+            "Please verify your email to continue"
+          )
+        );
+    }
+
+    const accessToken = userExist.generateAccessToken();
+
+    const refreshToken = userExist.generateRefreshToken();
+
+    await User.findByIdAndUpdate(userExist._id, { refreshToken });
+
+    const loggedInUser = await User.findById(userExist._id).select(
+      "-password -refreshToken -otp -otpExpiry"
+    );
 
     const options = {
       httpOnly: true,
@@ -95,9 +169,14 @@ const loginUser = async (req, res, next) => {
 
     return res
       .status(200)
-      .cookie("token", token, options)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json(
-        new ApiResponse(200, { userExist, token }, "Logged in sucessfully")
+        new ApiResponse(
+          200,
+          { loggedInUser, accessToken },
+          "Logged in sucessfully"
+        )
       );
   } catch (error) {
     next(error);
@@ -113,9 +192,7 @@ const getUserProfile = async (req, res, next) => {
 
     return res
       .status(200)
-      .json(
-        new ApiResponse(200, currentUser, "Current user fetched Successfully")
-      );
+      .json(new ApiResponse(200, currentUser, "User fetched Successfully"));
   } catch (error) {
     next(error);
   }
@@ -123,7 +200,8 @@ const getUserProfile = async (req, res, next) => {
 
 const logoutUser = async (req, res, next) => {
   try {
-    const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+    const token =
+      req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
     await BlacklistToken.create({ token });
 
@@ -141,4 +219,4 @@ const logoutUser = async (req, res, next) => {
   }
 };
 
-export { registerUser, loginUser, getUserProfile, logoutUser };
+export { registerUser, verifyEmail, loginUser, getUserProfile, logoutUser };

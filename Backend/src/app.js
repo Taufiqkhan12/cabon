@@ -2,9 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config({ path: "./.env" });
 import { connectDB } from "./db/db.js";
-
-dotenv.config();
 
 const app = express();
 
@@ -20,10 +19,12 @@ app.use(cookieParser());
 // routes import
 
 import userRoutes from "./routes/user.routes.js";
+import captainRoutes from "./routes/captain.routes.js";
 
 // routes declartion
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/captain", captainRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

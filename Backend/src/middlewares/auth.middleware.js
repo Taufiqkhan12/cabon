@@ -5,7 +5,8 @@ import { BlacklistToken } from "../models/blacklistToken.model.js";
 
 export const verfiyJwt = async (req, _, next) => {
   try {
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    const token =
+      req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       throw new ApiError(401, "Unauthorized Access");
@@ -23,7 +24,7 @@ export const verfiyJwt = async (req, _, next) => {
       throw new ApiError(400, "Invalid Token");
     }
 
-    const user = await User.findById(decodedToken?._id);
+    const user = await User.findById(decodedToken?._id).select("-password");
 
     if (!user) {
       throw new ApiError(400, "Invalid Token");
