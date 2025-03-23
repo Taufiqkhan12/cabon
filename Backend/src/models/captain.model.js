@@ -4,6 +4,14 @@ import jwt from "jsonwebtoken";
 
 const captainSchema = new Schema(
   {
+    profileimage: {
+      public_id: { type: String },
+      secure_url: { type: String },
+    },
+    vehicleimage: {
+      public_id: { type: String },
+      secure_url: { type: String },
+    },
     fullname: {
       firstname: {
         type: String,
@@ -71,6 +79,10 @@ const captainSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    otp: { type: Number },
+    otpExpiry: { type: Date },
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date },
   },
   {
     timestamps: true,

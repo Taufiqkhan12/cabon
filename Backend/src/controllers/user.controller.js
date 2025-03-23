@@ -1,7 +1,11 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { userRegistrationValidation } from "../validator/user.validator.js";
+import {
+  emailValidation,
+  passwordValidation,
+  userRegistrationValidation,
+} from "../validator/user.validator.js";
 import { BlacklistToken } from "../models/blacklistToken.model.js";
 import {
   generateAndSendOtp,
@@ -26,7 +30,6 @@ const registerUser = async (req, res, next) => {
     });
 
     if (inputError) {
-      console.log(inputError);
       throw new ApiError(400, `${inputError[0].message}`);
     }
 
@@ -119,6 +122,12 @@ const resendOtp = async (req, res, next) => {
       throw new ApiError(400, "Email is required");
     }
 
+    const inputError = emailValidation({ email });
+
+    if (inputError) {
+      throw new ApiError(400, `${inputError[0].message}`);
+    }
+
     const user = await User.findOne({ email }).select(
       "-password -refreshToken -otp -otpExpiry"
     );
@@ -153,6 +162,18 @@ const loginUser = async (req, res, next) => {
 
     if (!email || !password) {
       throw new ApiError(400, "All fields must be filled");
+    }
+
+    const inputEmailError = emailValidation({ email });
+
+    if (inputEmailError) {
+      throw new ApiError(400, `${inputError[0].message}`);
+    }
+
+    const inputPasswordError = passwordValidation({ password });
+
+    if (inputPasswordError) {
+      throw new ApiError(400, `${inputError[0].message}`);
     }
 
     const userExist = await User.findOne({ email });
@@ -261,6 +282,12 @@ const forgotPassword = async (req, res, next) => {
       throw new ApiError(400, "Email is required");
     }
 
+    const inputError = emailValidation({ email });
+
+    if (inputError) {
+      throw new ApiError(400, `${inputError[0].message}`);
+    }
+
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -291,6 +318,12 @@ const resetPassword = async (req, res, next) => {
   try {
     const { resetToken } = req.params;
     const { password } = req.body;
+
+    const inputError = passwordValidation({ email });
+
+    if (inputError) {
+      throw new ApiError(400, `${inputError[0].message}`);
+    }
 
     const decodeToken = jwt.verify(resetToken, process.env.JWT_SECRET);
 
