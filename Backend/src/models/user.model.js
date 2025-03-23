@@ -36,7 +36,9 @@ const userSchema = new Schema(
       type: String,
     },
     otp: { type: Number },
-    otpExpiry: { type: Number },
+    otpExpiry: { type: Date },
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date },
   },
   {
     timestamps: true,
@@ -50,13 +52,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.isPasswordCorrect = async function (enteredPassword) {
-  console.log("Entered Password:", enteredPassword);
-  console.log("Stored Hashed Password:", this.password);
-
-  const match = await bcrypt.compare(enteredPassword, this.password);
-  console.log("Password Match:", match);
-
-  return match;
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
 userSchema.methods.generateAccessToken = function () {

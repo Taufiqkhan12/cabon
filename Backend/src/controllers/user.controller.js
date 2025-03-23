@@ -3,7 +3,11 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { userRegistrationValidation } from "../validator/user.validator.js";
 import { BlacklistToken } from "../models/blacklistToken.model.js";
-import { generateOtp, otpExpiry, sendOtp } from "../utils/utilityFunction.js";
+import {
+  generateAndSendOtp,
+  sendResetPasswordEmail,
+} from "../utils/utilityFunction.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = async (req, res, next) => {
   try {
@@ -34,8 +38,7 @@ const registerUser = async (req, res, next) => {
       throw new ApiError(400, "User with this email already exists");
     }
 
-    const otp = generateOtp();
-    const expiry = otpExpiry();
+    const { generateOtp, otpExpiry } = await generateAndSendOtp(email);
 
     const user = await User.create({
       fullname: {
@@ -45,8 +48,8 @@ const registerUser = async (req, res, next) => {
       email: normalizedEmail,
       phone,
       password,
-      otp,
-      otpExpiry: expiry,
+      otp: generateOtp,
+      otpExpiry: otpExpiry,
     });
 
     const createdUser = await User.findById(user._id).select(
@@ -56,8 +59,6 @@ const registerUser = async (req, res, next) => {
     if (!createdUser) {
       throw new ApiError(500, "Something went wrong registering the user");
     }
-
-    await sendOtp(email, otp);
 
     const accessToken = user.generateAccessToken();
 
@@ -110,6 +111,42 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
+const resendOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new ApiError(400, "Email is required");
+    }
+
+    const user = await User.findOne({ email }).select(
+      "-password -refreshToken -otp -otpExpiry"
+    );
+
+    if (!user) {
+      throw new ApiError(404, "No user registered with this email");
+    }
+
+    if (user.isVerified) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Email already verified"));
+    }
+
+    const { generateOtp, otpExpiry } = await generateAndSendOtp(email);
+
+    user.otp = generateOtp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "New otp has been sent"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -133,12 +170,10 @@ const loginUser = async (req, res, next) => {
     const isVerified = userExist.isVerified;
 
     if (!isVerified) {
-      const otp = generateOtp();
-      const expiry = otpExpiry();
-      await sendOtp(email, otp);
+      const { generateOtp, otpExpiry } = await generateAndSendOtp(email);
 
-      userExist.otp = otp;
-      userExist.otpExpiry = expiry;
+      userExist.otp = generateOtp;
+      userExist.otpExpiry = otpExpiry;
       await userExist.save();
 
       return res
@@ -146,7 +181,7 @@ const loginUser = async (req, res, next) => {
         .json(
           new ApiResponse(
             403,
-            { isVerified, email },
+            { isVerified },
             "Please verify your email to continue"
           )
         );
@@ -171,13 +206,7 @@ const loginUser = async (req, res, next) => {
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
-      .json(
-        new ApiResponse(
-          200,
-          { loggedInUser, accessToken },
-          "Logged in sucessfully"
-        )
-      );
+      .json(new ApiResponse(200, { loggedInUser }, "Logged in sucessfully"));
   } catch (error) {
     next(error);
   }
@@ -205,6 +234,10 @@ const logoutUser = async (req, res, next) => {
 
     await BlacklistToken.create({ token });
 
+    const user = req.user;
+    user.refreshToken = undefined;
+    await user.save();
+
     const options = {
       httpOnly: true,
       secure: true,
@@ -212,11 +245,94 @@ const logoutUser = async (req, res, next) => {
 
     return res
       .status(200)
-      .clearCookie("token", options)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
       .json(new ApiResponse(200, {}, "Logged out successfully"));
   } catch (error) {
     next(error);
   }
 };
 
-export { registerUser, verifyEmail, loginUser, getUserProfile, logoutUser };
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new ApiError(400, "Email is required");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new ApiError(404, "User with this email does not exist");
+    }
+
+    const resetToken = user.generateAccessToken();
+    const resetTokenExpiry = Date.now() + 1 * 60 * 60 * 1000;
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
+
+    sendResetPasswordEmail(
+      email,
+      `${process.env.CLIENT_URL}/reset-password/${resetToken}`
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Password reset request mail sent"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { resetToken } = req.params;
+    const { password } = req.body;
+
+    const decodeToken = jwt.verify(resetToken, process.env.JWT_SECRET);
+
+    if (!decodeToken) {
+      throw new ApiError(403, "Invalid or expired reset token");
+    }
+
+    const user = await User.findById(decodeToken?._id).select(
+      "password resetToken resetTokenExpiry"
+    );
+
+    if (!user) {
+      throw new ApiError(403, "Invalid or expired reset token");
+    }
+
+    if (user.resetToken !== resetToken || user.resetTokenExpiry < Date.now()) {
+      user.resetToken = undefined;
+      user.resetTokenExpiry = undefined;
+      await user.save();
+      throw new ApiError(403, "Invalid or expired reset token");
+    }
+
+    user.password = password;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Password reset successful"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  registerUser,
+  verifyEmail,
+  resendOtp,
+  loginUser,
+  getUserProfile,
+  logoutUser,
+  forgotPassword,
+  resetPassword,
+};
