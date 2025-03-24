@@ -44,8 +44,6 @@ Registers a new user and sends an OTP for email verification. Creates a new user
 }
 ```
 
----
-
 ## 2. Email Verification Endpoint
 
 ### Endpoint
@@ -84,8 +82,6 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
----
-
 ## 3. Resend OTP Endpoint
 
 ### Endpoint
@@ -115,8 +111,6 @@ Resends verification OTP to user's email if not already verified.
   "message": "New otp has been sent"
 }
 ```
-
----
 
 ## 4. User Login Endpoint
 
@@ -153,8 +147,6 @@ Authenticates user and returns access and refresh tokens. Sets tokens in HTTP-on
 }
 ```
 
----
-
 ## 5. Get User Profile Endpoint
 
 ### Endpoint
@@ -187,8 +179,6 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
----
-
 ## 6. User Logout Endpoint
 
 ### Endpoint
@@ -219,8 +209,6 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
----
-
 ## 7 Forgot Password
 
 **Endpoint:** `POST /api/v1/user/forgot-password`
@@ -247,8 +235,6 @@ Initiates the password reset process by generating a reset token and sending it 
   "data": {}
 }
 ```
-
----
 
 ## 8 Reset Password
 
@@ -280,8 +266,6 @@ Allows user to set a new password using the reset token received via email.
   "data": {}
 }
 ```
-
----
 
 ---
 
