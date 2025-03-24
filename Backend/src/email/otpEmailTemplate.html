@@ -32,6 +32,7 @@
         margin: 20px 0px 10px 0px;
       }
       .other {
+        color: #777;
         font-size: 12px;
       }
       .otp {
@@ -64,15 +65,14 @@
       />
       <p>Your One-Time Password (OTP) for verification is:</p>
       <p class="otp">{{OTP}}</p>
-
+      <p class="other">
+        This OTP is valid for 5 minutes. Please do not share it with anyone.
+      </p>
       <div class="footer">
-        <p class="other">
-          This OTP is valid for 5 minutes. Please do not share it with anyone.
-        </p>
         <p class="other">
           If you did not request this, please ignore this email.
         </p>
-        <p class="other">© {{year}} Uber Clone. All rights reserved.</p>
+        <p class="other">&copy; {{year}} Uber. All rights reserved.</p>
       </div>
     </div>
   </body>

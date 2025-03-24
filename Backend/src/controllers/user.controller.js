@@ -71,7 +71,7 @@ const registerUser = async (req, res, next) => {
     };
 
     return res
-      .status(200)
+      .status(201)
       .cookie("accessToken", accessToken, options)
       .json(
         new ApiResponse(201, { createdUser }, "User Registered Sucessfully")
@@ -319,7 +319,7 @@ const resetPassword = async (req, res, next) => {
     const { resetToken } = req.params;
     const { password } = req.body;
 
-    const inputError = passwordValidation({ email });
+    const inputError = passwordValidation({ password });
 
     if (inputError) {
       throw new ApiError(400, `${inputError[0].message}`);

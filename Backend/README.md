@@ -10,14 +10,6 @@
 
 Registers a new user and sends an OTP for email verification. Creates a new user account with the provided information and sends a verification OTP to the user's email.
 
-### Required Data
-
-- **firstname** (string): Required. Must be at least 3 characters long.
-- **lastname** (string): Optional. If provided, must be at least 3 characters long.
-- **email** (string): Required. Must be a valid email format. Must be unique.
-- **password** (string): Required. Must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%\*?&#).
-- **phone** (string): Required. Must be a valid phone number. Must be unique.
-
 ### Example Request Body
 
 ```json
@@ -72,10 +64,6 @@ Requires JWT token in Authorization header:
 Authorization: Bearer <jwt_token>
 ```
 
-### Required Data
-
-- **otp** (number): Required. OTP received in email.
-
 ### Example Request Body
 
 ```json
@@ -108,10 +96,6 @@ Authorization: Bearer <jwt_token>
 
 Resends verification OTP to user's email if not already verified.
 
-### Required Data
-
-- **email** (string): Required. Registered email address.
-
 ### Example Request Body
 
 ```json
@@ -143,11 +127,6 @@ Resends verification OTP to user's email if not already verified.
 ### Description
 
 Authenticates user and returns access and refresh tokens. Sets tokens in HTTP-only cookies.
-
-### Required Data
-
-- **email** (string): Required. Registered email address.
-- **password** (string): Required. Account password.
 
 ### Example Request Body
 
@@ -249,10 +228,6 @@ Authorization: Bearer <jwt_token>
 **Description:**  
 Initiates the password reset process by generating a reset token and sending it to the user's registered email address.
 
-**Required Data:**
-
-- **email** (string): Required. Email address associated with the account.
-
 **Example Request Body:**
 
 ```json
@@ -286,15 +261,6 @@ Allows user to set a new password using the reset token received via email.
 
 - **resetToken** (string): The token received in the reset password email
 
-**Required Data:**
-
-- **password** (string): Required. New password that meets the following criteria:
-  - Minimum 8 characters
-  - At least one uppercase letter
-  - At least one lowercase letter
-  - At least one number
-  - At least one special character (@$!%\*?&#)
-
 **Example Request Body:**
 
 ```json
@@ -312,5 +278,256 @@ Allows user to set a new password using the reset token received via email.
   "status": 200,
   "message": "Password has been reset successfully",
   "data": {}
+}
+```
+
+---
+
+---
+
+# Captain Authentication API Documentation
+
+## 1. Captain Registration Endpoint
+
+### Endpoint
+
+`POST /api/v1/captain/register`
+
+### Description
+
+Registers a new captain with vehicle details and sends an OTP for email verification.
+
+### Example Request Body
+
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "email": "john.doe@example.com",
+  "phone": "1234567890",
+  "password": "Secure@123",
+  "color": "Black",
+  "plate": "ABC-123",
+  "capacity": 4,
+  "type": "car"
+}
+```
+
+### Success Response
+
+- **201 Created**
+
+```json
+{
+  "status": 201,
+  "data": {
+    "createdCaptain": {
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "john.doe@example.com",
+      "phone": "1234567890",
+      "vehicle": {
+        "color": "Black",
+        "plate": "ABC-123",
+        "capacity": 4,
+        "vehicleType": "car"
+      },
+      "status": "inactive",
+      "isVerified": false
+    }
+  },
+  "message": "Captain Registered Successfully"
+}
+```
+
+## 2. Captain Login Endpoint
+
+### Endpoint
+
+`POST /api/v1/captain/login`
+
+### Description
+
+Authenticates a captain and provides access tokens.
+
+### Example Request Body
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "Secure@123"
+}
+```
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {
+    "loggedInCaptain": {
+      /* captain details excluding sensitive information */
+    }
+  },
+  "message": "Logged in successfully"
+}
+```
+
+## 3. Captain Profile Endpoint
+
+### Endpoint
+
+`GET /api/v1/captain/profile`
+
+### Description
+
+Retrieves the authenticated captain's profile information.
+
+### Authentication
+
+Requires JWT token in Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {
+    /* captain profile details */
+  },
+  "message": "Captain fetched Successfully"
+}
+```
+
+## 4. Email Verification Endpoint
+
+### Endpoint
+
+`POST /api/v1/captain/verify-email`
+
+### Example Request Body
+
+```json
+{
+  "otp": "123456"
+}
+```
+
+### Authentication
+
+Requires JWT token
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {},
+  "message": "Your email has been successfully verified"
+}
+```
+
+## 5. Resend OTP Endpoint
+
+### Endpoint
+
+`POST /api/v1/captain/resend-otp`
+
+### Example Request Body
+
+```json
+{
+  "email": "john.doe@example.com"
+}
+```
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {},
+  "message": "New otp has been sent"
+}
+```
+
+## 6. Logout Endpoint
+
+### Endpoint
+
+`POST /api/v1/captain/logout`
+
+### Authentication
+
+Requires JWT token
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {},
+  "message": "Logged out successfully"
+}
+```
+
+## 7 Forgot Password
+
+`POST /api/v1/captain/forgot-password`
+
+### Example Request Body
+
+```json
+{
+  "email": "john.doe@example.com"
+}
+```
+
+#### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {},
+  "message": "Password reset request mail sent"
+}
+```
+
+## 8 Reset Password
+
+`POST /api/v1/captain/reset-password/:resetToken`
+
+#### Required Data
+
+- **password** (string): New password meeting security requirements
+- **resetToken** (string): Token received via email (as URL parameter)
+
+#### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {},
+  "message": "Password reset successful"
 }
 ```

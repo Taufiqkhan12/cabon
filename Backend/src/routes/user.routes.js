@@ -9,21 +9,21 @@ import {
   resetPassword,
   verifyEmail,
 } from "../controllers/user.controller.js";
-import { verfiyJwt } from "../middlewares/auth.middleware.js";
+import { verfiyUserJwt } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router.route("/register").post(registerUser);
 
-router.route("/verify-email").post(verfiyJwt, verifyEmail);
+router.route("/verify-email").post(verfiyUserJwt, verifyEmail);
 
 router.route("/resend-otp").post(resendOtp);
 
 router.route("/login").post(loginUser);
 
-router.route("/profile").get(verfiyJwt, getUserProfile);
+router.route("/profile").get(verfiyUserJwt, getUserProfile);
 
-router.route("/logout").post(verfiyJwt, logoutUser);
+router.route("/logout").post(verfiyUserJwt, logoutUser);
 
 router.route("/forgot-password").post(forgotPassword);
 
