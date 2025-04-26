@@ -25,7 +25,9 @@ export const verfiyUserJwt = async (req, _, next) => {
       throw new ApiError(400, "Invalid Token");
     }
 
-    const user = await User.findById(decodedToken?._id).select("-password");
+    const user = await User.findById(decodedToken?._id).select(
+      "-password -refreshToken"
+    );
 
     if (!user) {
       throw new ApiError(400, "Invalid Token");

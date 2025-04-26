@@ -420,6 +420,22 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
+const checkAuth = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new ApiError(401, "Invalid Token");
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "User authenticated"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   registerUser,
   verifyEmail,
@@ -431,4 +447,5 @@ export {
   resetPassword,
   signInWithGoogle,
   refreshToken,
+  checkAuth,
 };
