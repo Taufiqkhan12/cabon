@@ -12,6 +12,8 @@ import {
   sendResetPasswordEmail,
 } from "../utils/utilityFunction.js";
 import jwt from "jsonwebtoken";
+import { oauth2client } from "../utils/google.config.js";
+import axios from "axios";
 
 const registerUser = async (req, res, next) => {
   try {
@@ -359,6 +361,65 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const signInWithGoogle = async (req, res, next) => {
+  try {
+    const { code } = req.params;
+    console.log(code);
+    const googleResponse = await oauth2client.getToken(code);
+    oauth2client.setCredentials(googleResponse.tokens);
+
+    const userRes = await axios.get(
+      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleResponse.tokens.access_token}`
+    );
+
+    const { email, name, picture } = userRes.data;
+    return res
+      .status(201)
+      .json(new ApiResponse(201, { email, name, picture }, "User Fetched"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const refreshToken = async (req, res, next) => {
+  try {
+    const incomingToken = req.cookies?.refreshToken;
+
+    if (!incomingToken) {
+      throw new ApiError(401, "Token is required");
+    }
+
+    const decodedToken = jwt.verify(incomingToken, process.env.JWT_SECRET);
+
+    if (!decodedToken) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    const user = await User.findOne({ refreshToken: incomingToken });
+
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    const accessToken = user.generateAccessToken();
+
+    const refreshToken = user.generateRefreshToken();
+
+    const options = {
+      secure: true,
+      httpOnly: true,
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(new ApiResponse(200, {}, "Access token refreshed"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   registerUser,
   verifyEmail,
@@ -368,4 +429,6 @@ export {
   logoutUser,
   forgotPassword,
   resetPassword,
+  signInWithGoogle,
+  refreshToken,
 };

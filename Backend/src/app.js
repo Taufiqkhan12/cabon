@@ -20,11 +20,15 @@ app.use(cookieParser());
 
 import userRoutes from "./routes/user.routes.js";
 import captainRoutes from "./routes/captain.routes.js";
+import mapRoutes from "./routes/maps.routes.js";
+import rideRoutes from "./routes/ride.routes.js";
 
 // routes declartion
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/captain", captainRoutes);
+app.use("/api/v1/map", mapRoutes);
+app.use("/api/v1/ride", rideRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
