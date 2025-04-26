@@ -209,7 +209,6 @@ const loginUser = async (req, res, next) => {
     }
 
     const accessToken = userExist.generateAccessToken();
-
     const refreshToken = userExist.generateRefreshToken();
 
     await User.findByIdAndUpdate(userExist._id, { refreshToken });
