@@ -18,7 +18,7 @@ const router = Router();
 
 router.route("/register").post(registerUser);
 
-router.route("/verify-email").post(verfiyUserJwt, verifyEmail);
+router.route("/verify-email").post(verifyEmail);
 
 router.route("/resend-otp").post(resendOtp);
 

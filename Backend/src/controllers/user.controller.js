@@ -85,13 +85,17 @@ const registerUser = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const { otp } = req.body;
+    const { email, otp } = req.body;
 
-    if (!otp) {
-      throw new ApiError(400, "Otp is required");
+    if (!otp || !email) {
+      throw new ApiError(400, "Otp and email is required");
     }
 
-    const user = req.user;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new ApiError(404, "No user registered with this email");
+    }
 
     if (user.otp !== Number(otp) || user.otpExpiry < Date.now()) {
       user.otp = undefined;
@@ -403,6 +407,8 @@ const refreshToken = async (req, res, next) => {
     const accessToken = user.generateAccessToken();
 
     const refreshToken = user.generateRefreshToken();
+
+    await User.findByIdAndUpdate(user._id, { refreshToken });
 
     const options = {
       secure: true,

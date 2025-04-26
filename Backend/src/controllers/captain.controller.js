@@ -108,13 +108,17 @@ const registerCaptain = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const { otp } = req.body;
+    const { email, otp } = req.body;
 
-    if (!otp) {
-      throw new ApiError(400, "Otp is required");
+    if (!otp || !email) {
+      throw new ApiError(400, "Otp and email is required");
     }
 
-    const captain = req.captain;
+    const captain = await Captain.findOne({ email });
+
+    if (!captain) {
+      throw new ApiError(404, "No captain registered with this email");
+    }
 
     if (captain.otp !== Number(otp) || captain.otpExpiry < Date.now()) {
       captain.otp = undefined;
