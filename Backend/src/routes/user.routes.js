@@ -4,9 +4,11 @@ import {
   getUserProfile,
   loginUser,
   logoutUser,
+  refreshToken,
   registerUser,
   resendOtp,
   resetPassword,
+  signInWithGoogle,
   verifyEmail,
 } from "../controllers/user.controller.js";
 import { verfiyUserJwt } from "../middlewares/auth.middleware.js";
@@ -28,5 +30,9 @@ router.route("/logout").post(verfiyUserJwt, logoutUser);
 router.route("/forgot-password").post(forgotPassword);
 
 router.route("/reset-password/:resetToken").post(resetPassword);
+
+router.route("/signin-with-google/:code").get(signInWithGoogle);
+
+router.route("/refresh-token").post(verfiyUserJwt, refreshToken);
 
 export default router;

@@ -65,7 +65,7 @@ const captainSchema = new Schema(
       },
     },
     location: {
-      lat: {
+      ltd: {
         type: Number,
       },
       lng: {
