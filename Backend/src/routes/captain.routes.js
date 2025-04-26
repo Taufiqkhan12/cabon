@@ -1,9 +1,11 @@
 import { Router } from "express";
 import {
+  checkCaptainAuth,
   forgotPassword,
   getCaptainProfile,
   loginCaptain,
   logoutCaptain,
+  refreshToken,
   registerCaptain,
   resendOtp,
   resetPassword,
@@ -28,5 +30,9 @@ router.route("/logout").post(verfiyCaptainJwt, logoutCaptain);
 router.route("/forgot-password").post(forgotPassword);
 
 router.route("/reset-password/:resetToken").post(resetPassword);
+
+router.route("/refresh-token").post(verfiyCaptainJwt, refreshToken);
+
+router.route("/check-captain-auth").get(verfiyCaptainJwt, checkCaptainAuth);
 
 export default router;

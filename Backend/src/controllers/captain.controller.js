@@ -395,6 +395,63 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const incomingToken = req.cookies?.refreshToken;
+
+    if (!incomingToken) {
+      throw new ApiError(401, "Token is required");
+    }
+
+    const decodedToken = jwt.verify(incomingToken, process.env.JWT_SECRET);
+
+    if (!decodedToken) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    const captain = await Captain.findOne({ refreshToken: incomingToken });
+
+    if (!captain) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    const accessToken = captain.generateAccessToken();
+
+    const refreshToken = captain.generateRefreshToken();
+
+    await Captain.findByIdAndUpdate(captain._id, { refreshToken });
+
+    const options = {
+      secure: true,
+      httpOnly: true,
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(new ApiResponse(200, {}, "Access token refreshed"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const checkCaptainAuth = async (req, res, next) => {
+  try {
+    const captain = req.captain;
+
+    if (!captain) {
+      throw new ApiError(401, "Invalid Token");
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, captain, "Captain authenticated"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   registerCaptain,
   verifyEmail,
@@ -404,4 +461,6 @@ export {
   logoutCaptain,
   forgotPassword,
   resetPassword,
+  refreshToken,
+  checkCaptainAuth,
 };
