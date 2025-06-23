@@ -17,7 +17,7 @@ export const getAddressCoordinate = async (address) => {
       throw new ApiError(400, "Invalid address");
     }
   } catch (error) {
-    next(error);
+    throw new ApiError(500, error);
   }
 };
 
