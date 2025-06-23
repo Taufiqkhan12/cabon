@@ -1,6 +1,12 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { createUserRide, getFare } from "../services/ride.service.js";
+import {
+  createUserRide,
+  getFare,
+  confirmRideService,
+  startRideService,
+  endRideService,
+} from "../services/ride.service.js";
 import { userRideCreateValidation } from "../validator/ride.validator.js";
 import {
   getCaptainsInTheRadius,
@@ -53,7 +59,7 @@ const createRide = async (req, res, next) => {
     captainsInRadius.map((captain) => {
       sendMessageToSocketId(captain.socketId, {
         event: "new-ride",
-        data: ride,
+        data: rideWithUser,
       });
     });
 
@@ -95,7 +101,12 @@ const confirmRide = async (req, res, next) => {
       throw new ApiError(400, "Ride id is required");
     }
 
-    const ride = confirmRideService(rideId, req.captain._id);
+    const ride = await confirmRideService({ rideId, captain: req.captain });
+
+    sendMessageToSocketId(ride.user.socketId, {
+      event: "ride-confirmed",
+      data: ride,
+    });
 
     return res.status(200).json(new ApiResponse(200, ride, "Ride confirmed"));
   } catch (error) {
@@ -103,4 +114,50 @@ const confirmRide = async (req, res, next) => {
   }
 };
 
-export { createRide, getRideFare, confirmRide };
+const startRide = async (req, res, next) => {
+  try {
+    const { rideId, otp } = req.query;
+
+    if (!rideId) {
+      throw new ApiError(400, "Ride id is required");
+    }
+
+    if (!otp) {
+      throw new ApiError(400, "Otp is required");
+    }
+
+    const ride = await startRideService({ rideId, otp, captain: req.captain });
+
+    sendMessageToSocketId(ride.user.socketId, {
+      event: "ride-started",
+      data: ride,
+    });
+
+    return res.status(200).json(new ApiResponse(200, { ride }, "Ride started"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const endRide = async (req, res, next) => {
+  try {
+    const { rideId } = req.body;
+
+    if (!rideId) {
+      throw new ApiError(400, "Ride id is required");
+    }
+
+    const ride = await endRideService({ rideId, captain: req.captain });
+
+    sendMessageToSocketId(ride.user.socketId, {
+      event: "ride-ended",
+      data: ride,
+    });
+
+    return res.status(200).json(new ApiResponse(200, { ride }, "Ride ended"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { createRide, getRideFare, confirmRide, startRide, endRide };

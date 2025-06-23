@@ -1,6 +1,7 @@
 /* prettier-ignore */
 
 import { Ride } from "../models/ride.model.js";
+import { sendMessageToSocketId } from "../socket.js";
 import { ApiError } from "../utils/ApiError.js";
 import { getDistanceAndTime } from "./maps.service.js";
 import crypto from "crypto";
@@ -99,7 +100,7 @@ export const createUserRide = async (
   return ride;
 };
 
-export const confirmRideService = async ({ rideId }) => {
+export const confirmRideService = async ({ rideId, captain }) => {
   if (!rideId) {
     throw new ApiError(400, "Ride id is required");
   }
@@ -109,11 +110,72 @@ export const confirmRideService = async ({ rideId }) => {
     { status: "accepted", captain: captain._id }
   );
 
-  const ride = await Ride.findOne({ _id: rideId }).populate("User");
+  const ride = await Ride.findOne({ _id: rideId })
+    .populate("User")
+    .populate("Captain")
+    .select("+otp");
 
   if (!ride) {
     throw new ApiError(404, "Ride not found");
   }
+
+  return ride;
+};
+
+export const startRideService = async ({ rideId, otp, captain }) => {
+  if (!rideId || !otp) {
+    throw new ApiError(400, "Ride id and otp is required");
+  }
+
+  const ride = await Ride.findOne({ _id: rideId })
+    .populate("User")
+    .populate("Captain")
+    .select("+otp");
+
+  if (!ride) {
+    throw new ApiError(404, "Ride not found");
+  }
+
+  if (ride.status !== "accepted") {
+    throw new ApiError("Ride not accepted");
+  }
+
+  if (ride.otp !== otp) {
+    throw new ApiError("Invalid Otp");
+  }
+
+  await Ride.findOneAndUpdate({ _id: rideId }, { status: "Ongoing" });
+
+  sendMessageToSocketId(ride.user.socketId, {
+    event: "ride-started",
+    data: ride,
+  });
+
+  return ride;
+};
+
+export const endRideService = async ({ rideId, captain }) => {
+  if (!rideId) {
+    throw new ApiError(400, "Ride id is required");
+  }
+
+  const ride = await Ride.findOne({
+    _id: rideId,
+    captain: captain._id,
+  })
+    .populate("User")
+    .populate("Captain")
+    .select("+otp");
+
+  if (!ride) {
+    throw new ApiError(404, "Ride not found");
+  }
+
+  if (ride.status !== "ongoing") {
+    throw new ApiError("Ride not ongoing");
+  }
+
+  await Ride.findOneAndUpdate({ _id: rideId }, { status: "completed" });
 
   return ride;
 };

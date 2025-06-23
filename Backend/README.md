@@ -267,6 +267,26 @@ Allows user to set a new password using the reset token received via email.
 }
 ```
 
+## 9 Refresh Token
+
+**Endpoint:** `POST /user/refresh-token`
+
+**Description:**  
+Allows user to refresh token received .
+
+**Success Response:**
+
+- **200 OK**
+
+```json
+{
+  "statusCode": 200,
+  "data": {},
+  "message": "Access token refreshed",
+  "success": true
+}
+```
+
 ---
 
 # Captain Authentication API Documentation
@@ -513,5 +533,237 @@ Requires JWT token
   "status": 200,
   "data": {},
   "message": "Password reset successful"
+}
+```
+
+# Maps API Documentation
+
+## 1. Get Coordinates
+
+### Endpoint
+
+`GET /api/v1/maps/get-coordinates?address=<address>`
+
+### Description
+
+Returns the latitude and longitude for a given address.
+
+### Authentication
+
+Requires JWT token in Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Query Parameters
+
+- **address** (string, required): The address to geocode (minimum 3 characters).
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {
+    "coordinates": {
+      "lat": 28.6139,
+      "lng": 77.209
+    }
+  },
+  "message": "Coordinates fetched successfully"
+}
+```
+
+---
+
+## 2. Get Distance and Time
+
+### Endpoint
+
+`GET /api/v1/maps/get-distance-time?origin=<origin>&destination=<destination>`
+
+### Description
+
+Returns the distance and estimated travel time between two addresses.
+
+### Authentication
+
+Requires JWT token in Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Query Parameters
+
+- **origin** (string, required): The starting address (minimum 3 characters).
+- **destination** (string, required): The destination address (minimum 3 characters).
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {
+    "distance": {
+      "text": "12.3 km",
+      "value": 12345
+    },
+    "duration": {
+      "text": "25 mins",
+      "value": 1500
+    }
+  },
+  "message": "Distance and Time fetched successfully"
+}
+```
+
+---
+
+## 3. Get Address Suggestions
+
+### Endpoint
+
+`GET /api/v1/maps/get-suggestions?address=<address>`
+
+### Description
+
+Returns autocomplete suggestions for a partial address.
+
+### Authentication
+
+Requires JWT token in Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Query Parameters
+
+- **address** (string, required): The partial address to get suggestions for (minimum 3 characters).
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {
+    "suggestion": [
+      {
+        "description": "123 Main St, Springfield, USA",
+        "place_id": "ChIJN1t_tDeuEmsRUsoyG83frY4"
+      },
+      ...
+    ]
+  },
+  "message": "Suggestions fetched successfully"
+}
+```
+
+# Ride API Documentation
+
+## 1. Create Ride
+
+### Endpoint
+
+`POST /api/v1/ride/create`
+
+### Description
+
+Creates a new ride request for a user and notifies nearby captains.
+
+### Authentication
+
+Requires JWT token in Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Request Body
+
+- **pickup** (string, required): Pickup address.
+- **destination** (string, required): Destination address.
+- **vehicletype** (string, required): Type of vehicle ("car", "auto", or "bike").
+
+#### Example
+
+```json
+{
+  "pickup": "123 Main St, City",
+  "destination": "456 Park Ave, City",
+  "vehicletype": "car"
+}
+```
+
+### Success Response
+
+- **201 Created**
+
+```json
+{
+  "status": 201,
+  "data": {
+    "ride": {
+      "_id": "rideId",
+      "user": "userId",
+      "pickup": "123 Main St, City",
+      "destination": "456 Park Ave, City",
+      "fare": 340,
+      "vehicletype": "car",
+      "status": "pending"
+    }
+  },
+  "message": "Ride created sucessfully"
+}
+```
+
+---
+
+## 2. Get Ride Fare
+
+### Endpoint
+
+`GET /api/v1/ride/get-fare?pickup=<pickup>&destination=<destination>`
+
+### Description
+
+Calculates and returns the fare for a ride between two locations for all vehicle types.
+
+### Authentication
+
+Requires JWT token in Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Query Parameters
+
+- **pickup** (string, required): Pickup address.
+- **destination** (string, required): Destination address.
+
+### Success Response
+
+- **200 OK**
+
+```json
+{
+  "status": 200,
+  "data": {
+    "fare": {
+      "car": 340,
+      "auto": 280,
+      "bike": 190
+    }
+  },
+  "message": "Fare fetched successfully"
 }
 ```

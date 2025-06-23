@@ -15,7 +15,7 @@ function initializeSocket(server) {
   io.on("connection", (socket) => {
     console.log(`Client connected: ${socket.id}`);
 
-    socket.join("join", async (data) => {
+    socket.on("join", async (data) => {
       const { userId, userType } = data;
 
       if (userType === "user") {
@@ -56,8 +56,6 @@ function initializeSocket(server) {
 }
 
 function sendMessageToSocketId(socketId, messageObject) {
-  console.log(messageObject);
-
   if (io) {
     io.to(socketId).emit(messageObject.event, messageObject.data);
   } else {
