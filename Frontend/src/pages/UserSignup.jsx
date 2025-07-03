@@ -1,8 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import userAuth from "../store/UserAuth";
 
 // Validation Schema
 const schema = yup.object().shape({
@@ -11,9 +12,18 @@ const schema = yup.object().shape({
     .string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-  firstname: yup.string().max(10, "Must not exceed 10 characters"),
-  lastname: yup.string(),
-  phone: yup.number("Phone number must be a number"),
+  firstname: yup
+    .string()
+    .max(10, "Must not exceed 10 characters")
+    .required("First name is required"),
+  lastname: yup
+    .string()
+    .max(10, "Must not exceed 10 characters")
+    .required("Last name is required"),
+  phone: yup
+    .string()
+    .max(10, "Phone number must not exceed 10 digits")
+    .required("Phone number is required"),
 });
 
 const UserSignup = () => {
@@ -23,9 +33,17 @@ const UserSignup = () => {
     formState: { errors },
     reset,
   } = useForm({ resolver: yupResolver(schema) });
+  const { UserSignup } = userAuth();
+  const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log("Login Data:", data);
+  const onSubmit = async (data) => {
+    localStorage.setItem("captainEmail", data.email);
+    try {
+      await UserSignup(data);
+      navigate("/verify-user");
+    } catch (error) {
+      console.log(error);
+    }
     reset();
   };
 

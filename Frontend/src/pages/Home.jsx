@@ -1,29 +1,253 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-
+/* eslint-disable no-unused-vars */
+import { useForm } from "react-hook-form";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useRef } from "react";
+import HomeStore from "../store/HomeStore";
+import LocationSearchPanel from "../components/LocationSearchPanel";
+import BookingOptionCards from "../components/BookingOptionCards";
+import { CaretDown } from "@phosphor-icons/react";
+import ConfirmRide from "../components/ConfirmRide";
+import LookingForDriver from "../components/LookingForDriver";
+import WaitingForDriver from "../components/WaitingForDriver";
+import UserStore from "../store/UserStore";
 const Home = () => {
+  const { register, handleSubmit } = useForm();
+  const {
+    panelOpen,
+    setPanelOpen,
+    vehiclePanelOpen,
+    setVehiclePanelOpen,
+    confirmRidePanel,
+    // setConfirmRidePanel,
+    lookingForDriverPanel,
+    waitingForDriverPanel,
+    // setLookingForDriverPanel,
+    // setWaitingForDriverPanel,
+  } = HomeStore();
+
+  const {
+    pickup,
+    destination,
+    setPickup,
+    setDestination,
+    handlePickupSuggestion,
+    pickupSuggestion,
+    destinationSuggestion,
+    setPickupSuggestion,
+    activeField,
+    setActiveField,
+    handleDestinationSuggestion,
+    getFare,
+  } = UserStore();
+
+  const panelRef = useRef(null);
+  const vehiclePanelRef = useRef(null);
+  const confirmRidePanelRef = useRef(null);
+  const lookingForDriverPanelRef = useRef(null);
+  const waitingForDriverPanelRef = useRef(null);
+
+  useGSAP(() => {
+    if (panelOpen) {
+      gsap.to(panelRef.current, {
+        height: "70%",
+      });
+    } else {
+      gsap.to(panelRef.current, {
+        height: "0%",
+      });
+    }
+  }, [panelOpen]);
+
+  useGSAP(() => {
+    if (vehiclePanelOpen) {
+      gsap.to(vehiclePanelRef.current, {
+        transform: "translateY(0)",
+      });
+    } else {
+      gsap.to(vehiclePanelRef.current, {
+        transform: "translatey(100%)",
+      });
+    }
+  }, [vehiclePanelOpen]);
+
+  useGSAP(() => {
+    if (confirmRidePanel) {
+      gsap.to(confirmRidePanelRef.current, {
+        transform: "translateY(0)",
+      });
+    } else {
+      gsap.to(confirmRidePanelRef.current, {
+        transform: "translatey(150%)",
+      });
+    }
+  }, [confirmRidePanel]);
+
+  useGSAP(() => {
+    if (lookingForDriverPanel) {
+      gsap.to(lookingForDriverPanelRef.current, {
+        transform: "translateY(0)",
+      });
+    } else {
+      gsap.to(lookingForDriverPanelRef.current, {
+        transform: "translatey(150%)",
+      });
+    }
+  }, [lookingForDriverPanel]);
+
+  useGSAP(() => {
+    if (waitingForDriverPanel) {
+      gsap.to(waitingForDriverPanelRef.current, {
+        transform: "translateY(0)",
+      });
+    } else {
+      gsap.to(waitingForDriverPanelRef.current, {
+        transform: "translatey(150%)",
+      });
+    }
+  }, [waitingForDriverPanel]);
+
+  const formSubmit = (data) => {
+    console.log(pickup, destination);
+  };
+
+  const handleCheckRides = async () => {
+    setPanelOpen(false);
+    setVehiclePanelOpen(true);
+    await getFare(pickup, destination);
+  };
+
   return (
-    <div className="">
-      <div className="bg-cover w-full bg-bottom bg-[url(https://images.unsplash.com/photo-1518430272387-254558840136?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2Fic3xlbnwwfHwwfHx8MA%3D%3D)] h-screen pt-8 flex justify-between flex-col ">
+    // <div>{`Hii ${userAuthData?.fullname?.firstname}, Welcome to Uber !`}</div>
+    <div className="h-screen relative">
+      <img
+        src="https://logos-world.net/wp-content/uploads/2020/05/Uber-Logo.png"
+        alt="Uber Logo"
+        className="w-16 absolute left-5 top-5"
+      />
+      <div className="h-screen w-screen">
+        {/* Map Image for temporary use   */}
         <img
-          src="https://imgs.search.brave.com/q0RpOP4Xrts5ZePV9tj0DUW7OsKkNhfzYHmyy7y19IY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9hc3Nl/dC5icmFuZGZldGNo/LmlvL2lkaWROYmlp/T2QvaWR6dFRmTUI1/ai5zdmc_dXBkYXRl/ZD0xNjY4MDcxMDM2/NDY5"
-          alt="image"
-          className="w-16 ml-8"
+          src="https://storage.googleapis.com/support-forums-api/attachment/thread-146048858-12639125651610213305.PNG"
+          alt="Map image"
+          className="h-full w-full object-cover"
         />
-        <div className="bg-[#252525] rounded-t-2xl text-white py-5 px-3">
-          <h2
-            className="text-2xl font-bold
-          "
+      </div>
+
+      <div className="w-full h-screen absolute top-0 flex flex-col justify-end">
+        {/* Input box for pick and drop  location  */}
+        <div className="h-[30%] w-full relative bg-white p-4">
+          <h4 className="font-semibold text-2xl font-sans">Find a Trip</h4>
+          <CaretDown
+            onClick={() => setPanelOpen(false)}
+            size={24}
+            className={`absolute right-5 top-5 ${panelOpen ? "" : "hidden"}`}
+          />
+          <form
+            action=""
+            className="flex flex-col gap-4 mt-4"
+            onSubmit={handleSubmit(formSubmit)}
           >
-            Get Started with Uber
-          </h2>
-          <NavLink
-            to="/login"
-            className="w-full flex items-center justify-center  bg-white font-semibold text-black py-3 rounded-lg mt-5"
-          >
-            Continue
-          </NavLink>
+            <div className="line w-[2.5px] h-14 absolute top-[82px] left-[33px] bg-black"></div>
+            <div className="circle rounded-full w-3 h-3 flex items-center justify-center bg-black top-[80px] left-7  absolute">
+              <div className="w-1 h-1 bg-white rounded-full"></div>
+            </div>
+            <input
+              type="text"
+              onClick={() => {
+                setPanelOpen(true);
+                setActiveField("pickup");
+              }}
+              placeholder="Add a pick-up location"
+              className="w-full px-12 py-2 rounded bg-[#eeeeee] text-base outline-0"
+              {...register("pickuplocation")}
+              onChange={handlePickupSuggestion}
+              value={pickup}
+            ></input>
+            <div className="circle w-3 h-3 flex items-center justify-center bg-black top-[134px] left-7  absolute">
+              <div className="w-1 h-1 bg-white"></div>
+            </div>
+            <input
+              type="text"
+              onClick={() => {
+                setPanelOpen(true);
+                setActiveField("destination");
+              }}
+              placeholder="Add a destination location"
+              className="w-full px-12 py-2 rounded bg-[#eeeeee] text-base outline-0"
+              {...register("destinationlocation")}
+              onChange={handleDestinationSuggestion}
+              value={destination}
+            />
+            {pickup && destination && (
+              <button
+                onClick={handleCheckRides}
+                className="bg-black w-full text-white px-4 py-2 rounded "
+              >
+                Check Rides
+              </button>
+            )}
+          </form>
         </div>
+        <div ref={panelRef} className={`bg-white ${panelOpen ? "" : "h-0"}`}>
+          <LocationSearchPanel
+            suggestions={
+              activeField === "pickup"
+                ? pickupSuggestion
+                : destinationSuggestion
+            }
+          />
+        </div>
+      </div>
+      {/* Vehicle Panel Ref  */}
+      <div
+        className="fixed z-10 bottom-0 w-full bg-white px-2 translate-y-full"
+        ref={vehiclePanelRef}
+      >
+        <h3 className="font-semibold text-xl p-4">Choose a vehicle</h3>
+        <CaretDown
+          onClick={() => setVehiclePanelOpen(false)}
+          size={24}
+          className={`absolute right-5 top-5 ${
+            vehiclePanelOpen ? "" : "hidden"
+          }`}
+        />
+
+        <BookingOptionCards />
+      </div>
+
+      {/* Confirm Ride Panel */}
+      <div
+        className="fixed z-10 bottom-0 w-full bg-white px-2 translate-y-[150%]"
+        ref={confirmRidePanelRef}
+      >
+        <h3 className="font-semibold text-xl p-4">Confirm Your Ride</h3>
+
+        <ConfirmRide />
+      </div>
+
+      {/* Looking for Ride Panel */}
+      <div
+        className="fixed z-10 bottom-0 w-full bg-white translate-y-[150%]"
+        ref={lookingForDriverPanelRef}
+      >
+        <h3 className="font-semibold text-xl text-center p-4">
+          Looking for Driver
+        </h3>
+
+        <LookingForDriver />
+      </div>
+
+      {/* Waiting for Ride Panel */}
+      <div
+        className="fixed z-10 bottom-0 w-full bg-white translate-y-[0%]"
+        ref={waitingForDriverPanelRef}
+      >
+        {/* <h3 className="font-semibold text-xl text-center p-4">
+          Looking for Driver
+        </h3> */}
+
+        <WaitingForDriver />
       </div>
     </div>
   );

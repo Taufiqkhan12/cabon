@@ -25,8 +25,11 @@ export const getDistanceAndTime = async (originAddress, destinationAddress) => {
   try {
     const apiKey = process.env.GOOGLE_MAPS_API;
 
-    const originCoord = getAddressCoordinate(originAddress);
-    const destinationCoord = getAddressCoordinate(destinationAddress);
+    const originCoord = await getAddressCoordinate(originAddress);
+    const destinationCoord = await getAddressCoordinate(destinationAddress);
+
+    console.log(originCoord);
+    console.log(destinationCoord);
 
     const origin = `${originCoord.lat},${originCoord.lng}`;
     const destination = `${destinationCoord.lat},${destinationCoord.lng}`;
@@ -36,21 +39,31 @@ export const getDistanceAndTime = async (originAddress, destinationAddress) => {
     const response = await axios.get(url);
 
     // Validate response structure
-    if (!response?.data?.rows?.[0]?.elements?.[0]) {
-      throw new ApiError(500, "Invalid response from Google Maps API");
+    // if (!response?.data?.rows?.[0]?.elements?.[0]) {
+    //   throw new ApiError(500, "Invalid response from Google Maps API");
+    // }
+
+    // const distance = response.data.rows[0].elements[0].distance;
+    // const duration = response.data.rows[0].elements[0].duration;
+
+    // if (response?.data?.rows?.[0]?.elements?.[0].status !== "OK") {
+    //   throw new ApiError(400, "Could not calculate distance and time");
+    // }
+
+    // return {
+    //   distance,
+    //   duration,
+    // };
+
+    if (response.data.status === "OK") {
+      if (response.data.rows[0].elements[0].status === "ZERO_RESULTS") {
+        throw new ApiError(404, "No routes found");
+      }
+
+      return response.data.rows[0].elements[0];
+    } else {
+      throw new ApiError(500, "Unable to fetch distance and time");
     }
-
-    const distance = response.data.rows[0].elements[0].distance;
-    const duration = response.data.rows[0].elements[0].duration;
-
-    if (response?.data?.rows?.[0]?.elements?.[0].status !== "OK") {
-      throw new ApiError(400, "Could not calculate distance and time");
-    }
-
-    return {
-      distance,
-      duration,
-    };
   } catch (error) {
     throw new ApiError(500, "Failed to get distance and time");
   }

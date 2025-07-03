@@ -1,8 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import userAuth from "../store/UserAuth";
 
 // Validation Schema
 const schema = yup.object().shape({
@@ -11,12 +12,37 @@ const schema = yup.object().shape({
     .string()
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-  firstname: yup.string().max(10, "Must not exceed 10 characters"),
-  lastname: yup.string(),
-  phone: yup.number("Phone number must be a number"),
+  firstname: yup
+    .string()
+    .max(10, "Must not exceed 10 characters")
+    .required("First name is required"),
+  lastname: yup
+    .string()
+    .max(10, "Must not exceed 10 characters")
+    .required("Last name is required"),
+  phone: yup
+    .string()
+    .max(10, "Phone number must not exceed 10 digits")
+    .required("Phone number is required"),
+  color: yup
+    .string()
+    .min(3, "Color must be at least 3 characters")
+    .max(10, "Must not exceed 10 characters"),
+
+  plate: yup
+    .string()
+    .min(3, "Plate must be at least 3 characters")
+    .max(10, "Must not exceed 10 characters"),
+
+  capacity: yup
+    .string()
+    .min(1, "Capacity must be at least 1")
+    .max(10, "Capacity must not exceed 10"),
 });
 
 const UserSignup = () => {
+  const { CaptainSignup } = userAuth();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -24,13 +50,20 @@ const UserSignup = () => {
     reset,
   } = useForm({ resolver: yupResolver(schema) });
 
-  const onSubmit = (data) => {
-    console.log("Login Data:", data);
+  const onSubmit = async (data) => {
+    localStorage.setItem("captainEmail", data.email);
+    try {
+      await CaptainSignup(data);
+      navigate("/verify-captain");
+    } catch (error) {
+      console.log(error);
+    }
+
     reset();
   };
 
   return (
-    <div className="w-full p-7 h-screen flex flex-col justify-between">
+    <div className="w-full p-7 h-full flex flex-col justify-between">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col space-y-5"
@@ -87,7 +120,7 @@ const UserSignup = () => {
         <input
           {...register("phone")}
           placeholder="+91 12345 67891"
-          type="text"
+          type="number"
           className="w-full px-4 py-2 rounded bg-[#eeeeee] outline-0"
         />
         {errors.phone && (
@@ -105,6 +138,65 @@ const UserSignup = () => {
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password.message}</p>
         )}
+
+        {/* Color & plate  */}
+        <div className="w-full flex items-center justify-center gap-5">
+          <div className="w-1/2">
+            <h3 className="text-lg mb-2 font-semibold">Color</h3>
+            <input
+              {...register("color")}
+              placeholder="Color"
+              type="text"
+              className="w-full px-4 py-2 rounded bg-[#eeeeee] outline-0"
+            />
+            {errors.color && (
+              <p className="text-red-500 text-sm">{errors.color.message}</p>
+            )}
+          </div>
+          <div className="w-1/2">
+            <h3 className="text-lg mb-2 font-semibold">Plate</h3>
+            <input
+              {...register("plate")}
+              placeholder="Plate"
+              type="text"
+              className="w-full px-4 py-2 rounded bg-[#eeeeee] outline-0"
+            />
+            {errors.plate && (
+              <p className="text-red-500 text-sm">{errors.plate.message}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Capacity & Type  */}
+        <div className="w-full flex items-center justify-center gap-5">
+          <div className="w-1/2">
+            <h3 className="text-lg mb-2 font-semibold">Capacity</h3>
+            <input
+              {...register("capacity")}
+              placeholder="Capacity"
+              type="number"
+              className="w-full px-4 py-2 rounded bg-[#eeeeee] outline-0"
+            />
+            {errors.capacity && (
+              <p className="text-red-500 text-sm">{errors.capacity.message}</p>
+            )}
+          </div>
+          <div className="w-1/2">
+            <h3 className="text-lg mb-2 font-semibold">Type</h3>
+
+            <select
+              {...register("type")}
+              className="w-full px-4 py-2 rounded bg-[#eeeeee] outline-0"
+            >
+              <option value="car">Car</option>
+              <option value="auto">Auto</option>
+              <option value="bike">Bike</option>
+            </select>
+            {errors.plate && (
+              <p className="text-red-500 text-sm">{errors.plate.message}</p>
+            )}
+          </div>
+        </div>
 
         {/* Submit Button */}
         <button
@@ -126,7 +218,7 @@ const UserSignup = () => {
       {/* Captain Login */}
       <NavLink
         to="/signup"
-        className="w-full flex items-center justify-center bg-amber-400 py-3 rounded text-white"
+        className="w-full mt-5 flex items-center justify-center bg-amber-400 py-3 rounded text-white"
       >
         Register as a User
       </NavLink>

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import userAuth from "../store/UserAuth";
+import { useNavigate } from "react-router-dom";
 
-const Otp = () => {
+const CaptainOtp = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [timer, setTimer] = useState(30); // 30 seconds for Resend OTP
+  const [timer, setTimer] = useState(30);
   const { handleSubmit } = useForm();
+  const { VerifyCaptain, ResendCaptainOtp } = userAuth();
+  const navigate = useNavigate();
 
   // Handle OTP input change
   const handleChange = (e, index) => {
@@ -28,14 +32,30 @@ const Otp = () => {
   };
 
   // Handle Submit
-  const onSubmit = () => {
-    alert(`OTP Submitted: ${otp.join("")}`);
+  const onSubmit = async () => {
+    console.log(`OTP Submitted: ${otp.join("")}`);
+    const data = {
+      otp: otp.join(""),
+      email: localStorage.getItem("captainEmail"),
+    };
+    try {
+      await VerifyCaptain(data);
+      navigate("/captain-login");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // Resend OTP Handler
-  const handleResendOTP = () => {
-    setOtp(["", "", "", "", "", ""]); // Clear OTP Fields
-    setTimer(30); // Reset Timer
+  const handleResendOTP = async () => {
+    setOtp(["", "", "", "", "", ""]);
+    setTimer(30);
+    const email = localStorage.getItem("captainEmail");
+    try {
+      await ResendCaptainOtp(email);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -105,4 +125,4 @@ const Otp = () => {
   );
 };
 
-export default Otp;
+export default CaptainOtp;

@@ -1,8 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import userAuth from "../store/UserAuth";
 
 // Validation Schema
 const schema = yup.object().shape({
@@ -14,16 +15,24 @@ const schema = yup.object().shape({
 });
 
 const CaptainLogin = () => {
+  const { CaptainLogin } = userAuth();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    // reset,
   } = useForm({ resolver: yupResolver(schema) });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log("Login Data:", data);
-    reset();
+    localStorage.setItem("captainEmail", data.email);
+    try {
+      await CaptainLogin(data, navigate);
+      navigate("/captain-home");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

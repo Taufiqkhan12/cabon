@@ -15,20 +15,21 @@ const schema = yup.object().shape({
 });
 
 const UserLogin = () => {
-  const { userLogin } = userAuth();
+  const { UserLogin } = userAuth();
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    // reset,
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
     console.log("Login Data:", data);
     try {
-      await userLogin(data);
-      navigate("/");
+      await UserLogin(data, navigate);
+      navigate("/home");
     } catch (error) {
       console.log(error);
     }
