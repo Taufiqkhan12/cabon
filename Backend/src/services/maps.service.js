@@ -21,9 +21,16 @@ export const getAddressCoordinate = async (address) => {
   }
 };
 
-export const getDistanceAndTime = async (origin, destination) => {
+export const getDistanceAndTime = async (originAddress, destinationAddress) => {
   try {
     const apiKey = process.env.GOOGLE_MAPS_API;
+
+    const originCoord = getAddressCoordinate(originAddress);
+    const destinationCoord = getAddressCoordinate(destinationAddress);
+
+    const origin = `${originCoord.lat},${originCoord.lng}`;
+    const destination = `${destinationCoord.lat},${destinationCoord.lng}`;
+
     const url = `https://maps.googleapis.com/maps/api/distancematrix/json?destinations=${destination}&origins=${origin}&key=${apiKey}`;
 
     const response = await axios.get(url);
