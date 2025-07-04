@@ -21,7 +21,7 @@ const rideSchema = new Schema({
   fare: { type: Number, required: true },
   status: {
     type: String,
-    enums: ["pending", "accepeted", "ongoing", "completed", "canceled"],
+    enum: ["pending", "accepeted", "ongoing", "completed", "canceled"],
     default: "pending",
   },
   duration: {

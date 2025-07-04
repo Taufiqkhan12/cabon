@@ -11,9 +11,11 @@ import { userRideCreateValidation } from "../validator/ride.validator.js";
 import {
   getCaptainsInTheRadius,
   getAddressCoordinate,
+  getDistanceAndTime,
 } from "../services/maps.service.js";
 import { sendMessageToSocketId } from "../socket.js";
-import { User } from "../models/user.model.js";
+// import { User } from "../models/user.model.js";
+import { Ride } from "../models/ride.model.js";
 
 const createRide = async (req, res, next) => {
   try {
@@ -33,11 +35,18 @@ const createRide = async (req, res, next) => {
       throw new ApiError(400, `${inputError[0].message}`);
     }
 
+    const { distance, duration } = await getDistanceAndTime(
+      pickup,
+      destination
+    );
+
     const ride = await createUserRide(
       req.user._id,
       pickup,
       destination,
-      vehicletype
+      vehicletype,
+      distance.value,
+      duration.value
     );
 
     const pickupCoordinates = await getAddressCoordinate(pickup);
@@ -45,17 +54,21 @@ const createRide = async (req, res, next) => {
     const captainsInRadius = await getCaptainsInTheRadius(
       pickupCoordinates.lat,
       pickupCoordinates.lng,
-      50000
+      20000
     );
-    console.log(captainsInRadius);
 
     if (!ride) {
-      throw new ApiError(500, "Something went wromg while creating ride");
+      throw new ApiError(500, "Something went wrong while creating ride");
     }
 
     ride.otp = "";
 
-    const rideWithUser = await User.findOne({ _id: ride._id }).populate("User");
+    const rideWithUser = await Ride.findOne({ _id: ride._id }).populate("user");
+    console.log(rideWithUser);
+
+    if (!rideWithUser) {
+      throw new ApiError(404, "Ride not found");
+    }
 
     captainsInRadius.map((captain) => {
       sendMessageToSocketId(captain.socketId, {

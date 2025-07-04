@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { CarProfile, Gauge, Timer } from "@phosphor-icons/react";
 import RidePopUp from "../components/RidePopUp";
 import HomeStore from "../store/HomeStore";
@@ -22,6 +22,8 @@ const CaptainHome = () => {
   const { captainAuthData } = userAuth();
   const ridePopUpPanelRef = useRef(null);
   const confirmRidePopUpPanelRef = useRef(null);
+
+  const [data, setData] = useState({});
 
   useEffect(() => {
     sendMessage("join", { userId: captainAuthData?._id, userType: "captain" });
@@ -46,6 +48,7 @@ const CaptainHome = () => {
 
   receiveMessage("new-ride", (data) => {
     console.log(data);
+    setData(data);
     setRidePopUpPanel(true);
   });
 
@@ -142,7 +145,7 @@ const CaptainHome = () => {
           <h3 className="font-semibold text-xl text-center py-4">
             New Ride Available !
           </h3>
-          <RidePopUp />
+          <RidePopUp data={data} />
         </div>
 
         {/* Confirm Ride Pop up  */}

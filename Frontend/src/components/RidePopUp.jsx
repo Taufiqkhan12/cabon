@@ -1,7 +1,7 @@
 import { MapPin, MapPinLine, MoneyWavy } from "@phosphor-icons/react";
 import HomeStore from "../store/HomeStore";
 
-const RidePopUp = () => {
+const RidePopUp = ({ data }) => {
   const { setRidePopUpPanel, setConfirmRidePopUpPanel } = HomeStore();
 
   return (
@@ -23,32 +23,39 @@ const RidePopUp = () => {
               alt=""
               className="w-1/2 object-cover"
             /> */}
-            <h2 className="font-semibold text-lg">Taufiq Khan</h2>
+            <h2 className="font-semibold text-lg">
+              {data?.user?.fullname?.firstname +
+                " " +
+                data?.user?.fullname?.lastname}
+            </h2>
           </div>
-          <div className="w-[30%] flex items-center justify-end">
-            <p className="font-medium text-base">2.2 KM</p>
+          <div className="w-[50%] flex items-center justify-end">
+            <div className="flex gap-2">
+              <p className=" font-medium text-base">
+                {(data?.distance / 1000).toFixed(1)} KM
+              </p>
+              <span>/</span>
+              <p className="font-medium text-base">
+                {(data?.duration / 60).toFixed(0)} Min
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-4 mt-5 justify-center items-start w-full">
           {/* Pick-up Address */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
             <MapPin size={24} />
-            <h4 className="text-sm font-semibold ml-2">
-              Khar West Station, Mumbai, Maharashtra 400052
-            </h4>
+            <h4 className="text-sm font-semibold ml-2">{data?.pickup}</h4>
           </div>
           {/* Destination Address */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
             <MapPinLine size={24} />
-            <h4 className="text-sm font-semibold ml-2">
-              Rizvi College of Engineering , Khar West, Mumbai, Maharashtra
-              400052
-            </h4>
+            <h4 className="text-sm font-semibold ml-2">{data?.destination}</h4>
           </div>
           {/* Price for the ride */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2 w-full">
             <MoneyWavy size={24} />
-            <h4 className="text-sm font-semibold ml-2">₹300</h4>
+            <h4 className="text-sm font-semibold ml-2">₹{data?.fare}</h4>
           </div>
         </div>
         {/* Buttons for further actions  */}
