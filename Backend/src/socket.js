@@ -19,9 +19,9 @@ function initializeSocket(server) {
       const { userId, userType } = data;
 
       if (userType === "user") {
-        await User.findByIdAndUpdate({ userId }, { socketId: socket.id });
+        await User.findByIdAndUpdate(userId, { socketId: socket.id });
       } else if (userType === "captain") {
-        await Captain.findByIdAndUpdate({ userId }, { socketId: socket.id });
+        await Captain.findByIdAndUpdate(userId, { socketId: socket.id });
       }
     });
 
@@ -36,15 +36,12 @@ function initializeSocket(server) {
         return socket.emit("error", { message: "Invalid location data" });
       }
 
-      await Captain.findByIdAndUpdate(
-        { captainId },
-        {
-          location: {
-            ltd: location.ltd,
-            lng: location.lng,
-          },
-        }
-      );
+      await Captain.findByIdAndUpdate(captainId, {
+        location: {
+          ltd: location.ltd,
+          lng: location.lng,
+        },
+      });
     });
 
     socket.on("disconnect", () => {

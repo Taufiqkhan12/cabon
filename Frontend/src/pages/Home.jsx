@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { useForm } from "react-hook-form";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import HomeStore from "../store/HomeStore";
 import LocationSearchPanel from "../components/LocationSearchPanel";
 import BookingOptionCards from "../components/BookingOptionCards";
@@ -11,8 +12,23 @@ import ConfirmRide from "../components/ConfirmRide";
 import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
 import UserStore from "../store/UserStore";
+import { SocketContext } from "../socket/SocketProvider";
+import userAuth from "../store/UserAuth";
 const Home = () => {
+  const { sendMessage, receiveMessage } = useContext(SocketContext);
+
+  const { userAuthData } = userAuth();
+
+  console.log(userAuthData?._id);
+
+  useEffect(() => {
+    sendMessage("join", {
+      userType: "user",
+      userId: userAuthData?._id,
+    });
+  }, []);
   const { register, handleSubmit } = useForm();
+
   const {
     panelOpen,
     setPanelOpen,
@@ -24,9 +40,6 @@ const Home = () => {
     waitingForDriverPanel,
     // setLookingForDriverPanel,
     // setWaitingForDriverPanel,
-  } = HomeStore();
-
-  const {
     pickup,
     destination,
     setPickup,
@@ -112,9 +125,9 @@ const Home = () => {
   };
 
   const handleCheckRides = async () => {
-    setPanelOpen(false);
-    setVehiclePanelOpen(true);
     await getFare(pickup, destination);
+    setPanelOpen(false);
+    // setVehiclePanelOpen(true);
   };
 
   return (

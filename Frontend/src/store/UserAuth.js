@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 const userAuth = create((set) => ({
   userAuthData: null,
+  captainAuthData: null,
 
   checkAuth: async () => {
     try {
@@ -111,6 +112,22 @@ const userAuth = create((set) => ({
         toast.error(err);
       }
       throw error;
+    }
+  },
+
+  // Captain Check Auth
+
+  CaptainCheckAuth: async () => {
+    try {
+      const res = await axiosInstance.get("/captain/check-captain-auth", {
+        withCredentials: true,
+      });
+
+      console.log(res.data.data);
+      if (res.data) set({ captainAuthData: res.data?.data });
+      return res;
+    } catch (error) {
+      console.log(error);
     }
   },
 

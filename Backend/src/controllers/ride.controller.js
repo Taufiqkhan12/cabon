@@ -45,8 +45,9 @@ const createRide = async (req, res, next) => {
     const captainsInRadius = await getCaptainsInTheRadius(
       pickupCoordinates.lat,
       pickupCoordinates.lng,
-      2000
+      50000
     );
+    console.log(captainsInRadius);
 
     if (!ride) {
       throw new ApiError(500, "Something went wromg while creating ride");

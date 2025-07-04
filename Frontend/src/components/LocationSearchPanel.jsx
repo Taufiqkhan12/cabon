@@ -4,8 +4,8 @@ import { MapPin } from "@phosphor-icons/react";
 import UserStore from "../store/UserStore";
 const LocationSearchPanel = ({ suggestions }) => {
   //   console.log(panelOpen);
-  const { panelOpen } = HomeStore();
-  const { setPickup, setDestination, activeField } = UserStore();
+  // const {  } = HomeStore();
+  const { panelOpen, setPickup, setDestination, activeField } = UserStore();
 
   // const handleLocationClick = () => {
   //   setPanelOpen(false), setVehiclePanelOpen(true);

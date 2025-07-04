@@ -1,18 +1,13 @@
 /* eslint-disable no-unused-vars */
-import React, { useRef } from "react";
-import {
-  CarProfile,
-  Gauge,
-  MapPin,
-  MapPinLine,
-  MoneyWavy,
-  Timer,
-} from "@phosphor-icons/react";
+import React, { useContext, useEffect, useRef } from "react";
+import { CarProfile, Gauge, Timer } from "@phosphor-icons/react";
 import RidePopUp from "../components/RidePopUp";
 import HomeStore from "../store/HomeStore";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
+import userAuth from "../store/UserAuth";
+import { SocketContext } from "../socket/SocketProvider";
 
 const CaptainHome = () => {
   const {
@@ -21,8 +16,38 @@ const CaptainHome = () => {
     confirmRidePopUpPanel,
     setConfirmRidePopUpPanel,
   } = HomeStore();
+
+  const { sendMessage, receiveMessage } = useContext(SocketContext);
+
+  const { captainAuthData } = userAuth();
   const ridePopUpPanelRef = useRef(null);
   const confirmRidePopUpPanelRef = useRef(null);
+
+  useEffect(() => {
+    sendMessage("join", { userId: captainAuthData?._id, userType: "captain" });
+
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          sendMessage("update-location-captain", {
+            captainId: captainAuthData?._id,
+            location: {
+              ltd: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+          });
+        });
+      }
+    };
+
+    const locationInterval = setInterval(updateLocation, 5000);
+    updateLocation();
+  }, []);
+
+  receiveMessage("new-ride", (data) => {
+    console.log(data);
+    setRidePopUpPanel(true);
+  });
 
   useGSAP(() => {
     if (ridePopUpPanel) {
@@ -75,7 +100,11 @@ const CaptainHome = () => {
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
-              <h2 className="font-medium text-lg ml-3">Ayub Khan</h2>
+              <h2 className="font-medium text-lg ml-3">
+                {captainAuthData?.fullname?.firstname +
+                  " " +
+                  captainAuthData?.fullname?.lastname}
+              </h2>
             </div>
             {/* Driver Details  */}
             <div className="flex w-full flex-col items-end justify-center">

@@ -7,6 +7,7 @@ const UserProtectedWrapper = ({ children }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
+  // console.log(userAuthData?._id);
   useEffect(() => {
     const validate = async () => {
       await checkAuth();

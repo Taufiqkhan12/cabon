@@ -22,20 +22,22 @@ export const getAddressCoordinate = async (address) => {
 };
 
 export const getDistanceAndTime = async (originAddress, destinationAddress) => {
+  const apiKey = process.env.GOOGLE_MAPS_API;
+
+  // const originCoord = await getAddressCoordinate(originAddress);
+  // const destinationCoord = await getAddressCoordinate(destinationAddress);
+
+  // console.log(originCoord);
+  // console.log(destinationCoord);
+
+  // const origin = `${originCoord.lat},${originCoord.lng}`;
+  // const destination = `${destinationCoord.lat},${destinationCoord.lng}`;
+
+  const url = `https://maps.googleapis.com/maps/api/distancematrix/json?destinations=${encodeURIComponent(
+    destinationAddress
+  )}&origins=${encodeURIComponent(originAddress)}&key=${apiKey}`;
+
   try {
-    const apiKey = process.env.GOOGLE_MAPS_API;
-
-    const originCoord = await getAddressCoordinate(originAddress);
-    const destinationCoord = await getAddressCoordinate(destinationAddress);
-
-    console.log(originCoord);
-    console.log(destinationCoord);
-
-    const origin = `${originCoord.lat},${originCoord.lng}`;
-    const destination = `${destinationCoord.lat},${destinationCoord.lng}`;
-
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?destinations=${destination}&origins=${origin}&key=${apiKey}`;
-
     const response = await axios.get(url);
 
     // Validate response structure
@@ -102,14 +104,16 @@ export const getAddressSuggestions = async (address) => {
 
 export const getCaptainsInTheRadius = async (ltd, lng, radius) => {
   // radius in km
-
-  const captains = await Captain.find({
-    location: {
-      $geoWithin: {
-        $centerSphere: [[ltd, lng], radius / 6371],
+  try {
+    const captains = await Captain.find({
+      location: {
+        $geoWithin: {
+          $centerSphere: [[lng, ltd], radius / 6371],
+        },
       },
-    },
-  });
-
-  return captains;
+    });
+    return captains;
+  } catch (error) {
+    throw new ApiError(500, "Failed to get captains in the radius");
+  }
 };
