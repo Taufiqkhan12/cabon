@@ -4,7 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
 import { ApiError } from "./ApiError";
-import dotenv from "dotenv";
+import dotenv from "doten";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
