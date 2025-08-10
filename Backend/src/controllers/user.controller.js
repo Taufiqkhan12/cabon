@@ -68,7 +68,6 @@ const registerUser = async (req, res, next) => {
     const accessToken = user.generateAccessToken();
 
     const options = {
-      httpOnly: true,
       secure: true,
     };
 
@@ -224,7 +223,6 @@ const loginUser = async (req, res, next) => {
     );
 
     const options = {
-      httpOnly: true,
       secure: true,
     };
 
@@ -265,7 +263,6 @@ const logoutUser = async (req, res, next) => {
     await user.save();
 
     const options = {
-      httpOnly: true,
       secure: true,
     };
 
@@ -411,7 +408,6 @@ const refreshToken = async (req, res, next) => {
 
     const options = {
       secure: true,
-      httpOnly: true,
     };
 
     return res

@@ -87,7 +87,6 @@ const registerCaptain = async (req, res, next) => {
     const accessToken = captain.generateAccessToken();
 
     const options = {
-      httpOnly: true,
       secure: true,
     };
 
@@ -248,7 +247,6 @@ const loginCaptain = async (req, res, next) => {
     );
 
     const options = {
-      httpOnly: true,
       secure: true,
     };
 
@@ -291,7 +289,6 @@ const logoutCaptain = async (req, res, next) => {
     await captain.save();
 
     const options = {
-      httpOnly: true,
       secure: true,
     };
 
@@ -422,7 +419,6 @@ const refreshToken = async (req, res, next) => {
 
     const options = {
       secure: true,
-      httpOnly: true,
     };
 
     return res
