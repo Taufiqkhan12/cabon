@@ -13,7 +13,7 @@ app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: true, limit: "20kb" }));
-app.use(express.static("public"));
+app.use(express.static("publi"));
 app.use(cookieParser());
 
 // routes import
