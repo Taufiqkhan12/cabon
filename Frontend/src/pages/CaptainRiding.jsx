@@ -1,7 +1,15 @@
 import React from "react";
 import { MapPin, MapPinLine, MoneyWavy } from "@phosphor-icons/react";
+import HomeStore from "../store/HomeStore";
+import { useNavigate } from "react-router-dom";
 
 const CaptainRiding = () => {
+  const { rideData, finishRide } = HomeStore();
+  const navigate = useNavigate();
+
+  const handleCompleteRide = async (rideId) => {
+    await finishRide(rideId, navigate);
+  };
   return (
     <>
       <div className="h-screen relative">
@@ -34,30 +42,44 @@ const CaptainRiding = () => {
                 alt=""
                 className="w-1/2 object-cover"
               /> */}
-                <h2 className="font-semibold text-lg">Taufiq Khan</h2>
+                <h2 className="font-semibold text-lg">
+                  {rideData?.user?.fullname?.firstname +
+                    " " +
+                    rideData?.user?.fullname?.lastname}
+                </h2>
               </div>
               <div className="w-[30%] flex items-center justify-end">
-                <p className="font-medium text-base">2.2 KM</p>
+                <p className="font-medium text-base">
+                  {(rideData?.distance / 1000).toFixed(1)} KM
+                </p>
               </div>
             </div>
             {/* Pick-up Address */}
-            <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
+            <div className="flex w-full items-center justify-start gap-2 border-b border-gray-200 p-2">
               <MapPin size={24} />
               <h4 className="text-sm font-semibold ml-2">
-                24B, Sector 18, St. Xaviers High School, Noida
+                {rideData?.pickup
+                  ? rideData?.pickup.length > 35
+                    ? rideData?.pickup.slice(0, 35) + "..."
+                    : rideData?.pickup
+                  : "Couldn't fetch"}
               </h4>
             </div>
             {/* Destination Address */}
-            <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
+            <div className="flex w-full items-center justify-start gap-2 border-b border-gray-200 p-2">
               <MapPinLine size={24} />
               <h4 className="text-sm font-semibold ml-2">
-                24B, Sector 18, St. Xaviers High School, Noida
+                {rideData?.destination
+                  ? rideData?.destination.length > 35
+                    ? rideData?.destination.slice(0, 35) + "..."
+                    : rideData?.destination
+                  : "Couldn't fetch"}
               </h4>
             </div>
             {/* Price for the ride */}
             <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2 w-full">
               <MoneyWavy size={24} />
-              <h4 className="text-sm font-semibold ml-2">₹300</h4>
+              <h4 className="text-sm font-semibold ml-2">₹{rideData?.fare}</h4>
             </div>
           </div>
           {/* Buttons for further actions  */}
@@ -69,7 +91,10 @@ const CaptainRiding = () => {
                       {" "}
                       Cancel
                     </button> */}
-            <button className="bg-green-500 mb-2 w-full text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-all">
+            <button
+              onClick={() => handleCompleteRide(rideData?._id)}
+              className="bg-green-500 mb-2 w-full text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-all"
+            >
               Finish Ride
             </button>
           </div>

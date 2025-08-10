@@ -33,7 +33,6 @@ const CaptainOtp = () => {
 
   // Handle Submit
   const onSubmit = async () => {
-    console.log(`OTP Submitted: ${otp.join("")}`);
     const data = {
       otp: otp.join(""),
       email: localStorage.getItem("captainEmail"),

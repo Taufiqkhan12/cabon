@@ -115,8 +115,8 @@ export const confirmRideService = async ({ rideId, captain }) => {
   );
 
   const ride = await Ride.findOne({ _id: rideId })
-    .populate("User")
-    .populate("Captain")
+    .populate("user")
+    .populate("captain")
     .select("+otp");
 
   if (!ride) {
@@ -126,14 +126,14 @@ export const confirmRideService = async ({ rideId, captain }) => {
   return ride;
 };
 
-export const startRideService = async ({ rideId, otp, captain }) => {
-  if (!rideId || !otp) {
+export const startRideService = async ({ rideId, NumOtp, captain }) => {
+  if (!rideId || !NumOtp) {
     throw new ApiError(400, "Ride id and otp is required");
   }
 
   const ride = await Ride.findOne({ _id: rideId })
-    .populate("User")
-    .populate("Captain")
+    .populate("user")
+    .populate("captain")
     .select("+otp");
 
   if (!ride) {
@@ -144,7 +144,7 @@ export const startRideService = async ({ rideId, otp, captain }) => {
     throw new ApiError("Ride not accepted");
   }
 
-  if (ride.otp !== otp) {
+  if (ride.otp !== NumOtp) {
     throw new ApiError("Invalid Otp");
   }
 
@@ -167,15 +167,15 @@ export const endRideService = async ({ rideId, captain }) => {
     _id: rideId,
     captain: captain._id,
   })
-    .populate("User")
-    .populate("Captain")
+    .populate("user")
+    .populate("captain")
     .select("+otp");
 
   if (!ride) {
     throw new ApiError(404, "Ride not found");
   }
 
-  if (ride.status !== "ongoing") {
+  if (ride.status !== "Ongoing") {
     throw new ApiError("Ride not ongoing");
   }
 

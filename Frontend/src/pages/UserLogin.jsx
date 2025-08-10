@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import userAuth from "../store/UserAuth";
+import UserStore from "../store/UserStore";
 
 // Validation Schema
 const schema = yup.object().shape({
@@ -17,6 +18,7 @@ const schema = yup.object().shape({
 const UserLogin = () => {
   const { UserLogin } = userAuth();
   const navigate = useNavigate();
+  const { loading, setLoading } = UserStore();
 
   const {
     register,
@@ -26,12 +28,14 @@ const UserLogin = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
-    console.log("Login Data:", data);
+    setLoading(true);
     try {
       await UserLogin(data, navigate);
       navigate("/home");
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,8 +76,15 @@ const UserLogin = () => {
         )}
 
         {/* Submit Button */}
-        <button className="w-full bg-[#252525] text-white py-2 rounded">
-          Login
+        <button
+          disabled={loading}
+          className={`w-full py-2 font-semibold rounded ${
+            loading
+              ? "bg-black/75 cursor-not-allowed text-white border border-black"
+              : " bg-[#252525] text-white cursor-pointer"
+          }`}
+        >
+          {loading ? "Logging In..." : " Login"}
         </button>
 
         {/* Signup Link */}

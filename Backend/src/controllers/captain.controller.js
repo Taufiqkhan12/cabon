@@ -359,7 +359,6 @@ const resetPassword = async (req, res, next) => {
     }
 
     const decodeToken = jwt.verify(resetToken, process.env.JWT_SECRET);
-    console.log(decodeToken);
     if (!decodeToken) {
       throw new ApiError(403, "Invalid or expired reset token");
     }

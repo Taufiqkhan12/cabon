@@ -3,22 +3,13 @@ import React from "react";
 import UserStore from "../store/UserStore";
 
 const BookingOptionCards = () => {
-  const {
-    setConfirmRidePanel,
-    setVehiclePanelOpen,
-    fare,
-
-    setVehicleType,
-  } = UserStore();
+  const { setConfirmRidePanel, setVehiclePanelOpen, fare, setVehicleType } =
+    UserStore();
 
   const handleRideClick = async (vehicletype) => {
     setVehiclePanelOpen(false);
-    // Open the confirm ride panel
     setConfirmRidePanel(true);
-
     setVehicleType(vehicletype);
-
-    // await createRide(vehicletype);
   };
 
   const options = [
@@ -58,18 +49,20 @@ const BookingOptionCards = () => {
       {options.map((option, index) => (
         <div
           key={index}
-          className="flex items-center justify-between p-3 w-full gap-5 my-4 border-2 rounded-lg transition-all  border-gray-200 active:border-2 active:border-black overflow-clip active:rounded-lg cursor-pointer"
+          className="flex items-center justify-between p-3 w-full md:w-3/4 xl:2/3 md:mx-auto gap-5 my-4 border-2 rounded-lg transition-all  border-gray-200 hover:bg-gray-50 hover:border-gray-300 active:border-2 active:border-black overflow-clip active:rounded-lg cursor-pointer"
           onClick={() => handleRideClick(option.type)}
         >
           <div className="w-full flex items-center justify-start gap-5">
             <img
               src={option.image}
               alt="Image for Booking Option"
-              className="w-1/4 object-cover"
+              className="w-1/4 md:w-1/6 object-cover"
             />
-            <div className="desc-box font-medium text-xs flex flex-col items-start justify-start">
+            <div className="desc-box font-medium text-xs lg:text-sm text-gray-700 flex flex-col items-start justify-start">
               <div className="flex items-center justify-center gap-5">
-                <h2 className="font-semibold text-lg">{option.name}</h2>
+                <h2 className="font-semibold text-lg xl:text-xl">
+                  {option.name}
+                </h2>
                 <div className="flex items-center gap-2 justify-center">
                   <User size={16} /> {option.space}
                 </div>

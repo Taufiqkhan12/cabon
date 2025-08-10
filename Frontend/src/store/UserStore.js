@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../axios/axiosInstance";
+import { debounce } from "../utils/debounce";
 const UserStore = create((set) => ({
   // States for managing's users home page
   panelOpen: false,
@@ -7,16 +8,22 @@ const UserStore = create((set) => ({
   confirmRidePanel: false,
   lookingForDriverPanel: false,
   waitingForDriverPanel: false,
+  rideDetails: {},
+  loading: false,
+  loadingText: false,
 
   setPanelOpen: (state) => set({ panelOpen: state }),
   setVehiclePanelOpen: (state) => set({ vehiclePanelOpen: state }),
   setConfirmRidePanel: (state) => set({ confirmRidePanel: state }),
   setLookingForDriverPanel: (state) => set({ lookingForDriverPanel: state }),
   setWaitingForDriverPanel: (state) => set({ waitingForDriverPanel: state }),
+  setRideDetails: (data) => set({ rideDetails: data }),
+  setLoading: (state) => set({ loading: state }),
+  setLoadingText: (state) => set({ loadingText: state }),
 
   //  States for managing user's ride details
-  pickup: "",
-  destination: "",
+  pickup: null,
+  destination: null,
   pickupSuggestion: [],
   destinationSuggestion: [],
   activeField: null,
@@ -30,35 +37,37 @@ const UserStore = create((set) => ({
   setActiveField: (state) => set({ activeField: state }),
   setVehicleType: (state) => set({ vehicleType: state }),
 
-  handlePickupSuggestion: async (e) => {
-    set({ pickup: e.target.value });
-
+  handlePickupSuggestion: debounce(async function (e) {
     try {
       const res = await axiosInstance.get(`/map/get-suggestions`, {
         params: { address: e.target.value },
         withCredentials: true,
       });
 
-      if (res.data.data) set({ pickupSuggestion: res.data?.data?.suggestion });
+      if (res.data.data) {
+        set({ loadingText: false });
+        set({ pickupSuggestion: res.data?.data?.suggestion });
+      }
     } catch (error) {
       console.log(error);
     }
-  },
+  }, 1000),
 
-  handleDestinationSuggestion: async (e) => {
-    set({ destination: e.target.value });
+  handleDestinationSuggestion: debounce(async (e) => {
     try {
       const res = await axiosInstance.get(`/map/get-suggestions`, {
         params: { address: e.target.value },
         withCredentials: true,
       });
 
-      if (res.data.data)
+      if (res.data.data) {
+        set({ loadingText: false });
         set({ destinationSuggestion: res.data?.data?.suggestion });
+      }
     } catch (error) {
       console.log(error);
     }
-  },
+  }, 1000),
 
   // Function to get fare based on pickup and destination
   getFare: async (pickup, destination) => {
@@ -93,9 +102,9 @@ const UserStore = create((set) => ({
         }
       );
 
-      console.log(res);
       if (res.data) {
         set({ lookingForDriverPanel: true });
+        set({ confirmRidePanel: false });
       }
     } catch (error) {
       console.log(error);

@@ -19,7 +19,7 @@ router.route("/get-fare").get(verfiyUserJwt, getRideFare);
 
 router.route("/confirm").post(verfiyCaptainJwt, confirmRide);
 
-router.route("/start-ride").get(verfiyCaptainJwt, startRide);
+router.route("/start-ride").post(verfiyCaptainJwt, startRide);
 
 router.route("/end-ride").post(verfiyCaptainJwt, endRide);
 

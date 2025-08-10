@@ -367,7 +367,6 @@ const resetPassword = async (req, res, next) => {
 const signInWithGoogle = async (req, res, next) => {
   try {
     const { code } = req.params;
-    console.log(code);
     const googleResponse = await oauth2client.getToken(code);
     oauth2client.setCredentials(googleResponse.tokens);
 

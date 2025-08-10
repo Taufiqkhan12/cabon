@@ -1,6 +1,8 @@
 import React from "react";
 import { MapPin, MapPinLine, MoneyWavy } from "@phosphor-icons/react";
+import UserStore from "../store/UserStore";
 const WaitingForDriver = () => {
+  const { rideDetails } = UserStore();
   return (
     <>
       <div className="h-full w-full bg-white p-4 flex flex-col items-start justify-center gap-4">
@@ -25,31 +27,74 @@ const WaitingForDriver = () => {
           {/* Driver Details  */}
           <div className="flex w-full flex-col items-end justify-center">
             {/* Name  */}
-            <h2 className="font-medium text-lg">Ayub Khan</h2>
-            <h3 className="font-bold">MH 04 KA 4353</h3>
-            <p className="text-gray-600 text-xs ">Maruti Suzuki Ertiga</p>
+            <h2 className="font-medium text-lg">
+              {(rideDetails?.captain?.fullname?.firstname || "") +
+                " " +
+                (rideDetails?.captain?.fullname?.lastname || "") ||
+                "Could not fetch driver's name"}
+            </h2>
+            <h3 className="font-bold">
+              {rideDetails?.captain?.vehicle?.plate ||
+                "Could not fetch plate number"}
+            </h3>
+            <p className="text-gray-600 text-xs ">
+              {rideDetails?.captain?.vehicle?.color &&
+              rideDetails?.captain?.vehicle?.vehicleType
+                ? `${rideDetails?.captain?.vehicle?.color} ${rideDetails?.captain?.vehicle?.vehicleType}`
+                : "Could not fetch vehicle type"}
+            </p>
           </div>
+
+          {/*  */}
+        </div>
+        <div className="w-full flex items-center justify-end">
+          <h2 className="font-semibold flex gap-1">
+            {rideDetails?.otp
+              ? String(rideDetails.otp)
+                  .split("")
+                  .map((char, index) => (
+                    <div
+                      key={index}
+                      className="size-8 flex items-center justify-center text-white bg-blue-700 rounded text-lg font-semibold"
+                    >
+                      {char}
+                    </div>
+                  ))
+              : "Could not fetch OTP"}
+          </h2>
         </div>
 
         <div className="flex flex-col gap-4 mt-10 justify-center items-start w-full">
           {/* Pick-up Address */}
-          <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
+          <div className="flex items-center w-full justify-start gap-2 border-b border-gray-200 p-2">
             <MapPin size={24} />
             <h4 className="text-sm font-semibold ml-2">
-              24B, Sector 18, St. Xaviers High School, Noida
+              {rideDetails?.pickup
+                ? rideDetails.pickup.length > 40
+                  ? rideDetails.pickup.slice(0, 40) + "..."
+                  : rideDetails.pickup
+                : "Could not fetch pickup address"}
             </h4>
           </div>
           {/* Destination Address */}
-          <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
+          <div className="flex items-center w-full justify-start gap-2 border-b border-gray-200 p-2">
             <MapPinLine size={24} />
             <h4 className="text-sm font-semibold ml-2">
-              24B, Sector 18, St. Xaviers High School, Noida
+              {rideDetails?.destination
+                ? rideDetails.destination.length > 40
+                  ? rideDetails.destination.slice(0, 40) + "..."
+                  : rideDetails.destination
+                : "Could not fetch destination address"}
             </h4>
           </div>
           {/* Price for the ride */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2 w-full">
             <MoneyWavy size={24} />
-            <h4 className="text-sm font-semibold ml-2">₹300</h4>
+            <h4 className="text-sm font-semibold ml-2">
+              {rideDetails?.fare !== undefined && rideDetails?.fare !== null
+                ? `₹${rideDetails.fare}`
+                : "Could not fetch fare"}
+            </h4>
           </div>
         </div>
         {/* Buttons for further actions  */}

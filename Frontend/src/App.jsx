@@ -20,7 +20,7 @@ const App = () => {
   // const { userAuthData } = userAuth();
 
   return (
-    <div className="">
+    <div className="font-sans">
       <Toaster containerClassName="text-center" />
       <Routes>
         <Route path="/" element={<Start />} />

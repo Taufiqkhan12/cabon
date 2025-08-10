@@ -31,8 +31,8 @@ const schema = yup.object().shape({
 
   plate: yup
     .string()
-    .min(3, "Plate must be at least 3 characters")
-    .max(10, "Must not exceed 10 characters"),
+    .min(10, "Plate must be at least 3 characters")
+    .max(20, "Must not exceed 10 characters"),
 
   capacity: yup
     .string()

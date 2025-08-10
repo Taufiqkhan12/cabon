@@ -64,7 +64,6 @@ const createRide = async (req, res, next) => {
     ride.otp = "";
 
     const rideWithUser = await Ride.findOne({ _id: ride._id }).populate("user");
-    console.log(rideWithUser);
 
     if (!rideWithUser) {
       throw new ApiError(404, "Ride not found");
@@ -130,7 +129,9 @@ const confirmRide = async (req, res, next) => {
 
 const startRide = async (req, res, next) => {
   try {
-    const { rideId, otp } = req.query;
+    const { rideId, otp } = req.body;
+
+    const NumOtp = Number(otp);
 
     if (!rideId) {
       throw new ApiError(400, "Ride id is required");
@@ -140,7 +141,11 @@ const startRide = async (req, res, next) => {
       throw new ApiError(400, "Otp is required");
     }
 
-    const ride = await startRideService({ rideId, otp, captain: req.captain });
+    const ride = await startRideService({
+      rideId,
+      NumOtp,
+      captain: req.captain,
+    });
 
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-started",

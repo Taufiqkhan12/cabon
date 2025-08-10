@@ -123,7 +123,6 @@ const userAuth = create((set) => ({
         withCredentials: true,
       });
 
-      console.log(res.data.data);
       if (res.data) set({ captainAuthData: res.data?.data });
       return res;
     } catch (error) {
@@ -134,7 +133,6 @@ const userAuth = create((set) => ({
   // Captain Login
   CaptainLogin: async (data, navigate) => {
     try {
-      console.log(data, navigate);
       const res = await axiosInstance.post("/captain/login", data, {
         withCredentials: true,
       });

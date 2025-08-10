@@ -25,7 +25,6 @@ const CaptainLogin = () => {
   } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
-    console.log("Login Data:", data);
     localStorage.setItem("captainEmail", data.email);
     try {
       await CaptainLogin(data, navigate);

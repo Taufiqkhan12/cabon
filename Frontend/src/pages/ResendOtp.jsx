@@ -14,9 +14,7 @@ const ResendOtp = () => {
   const { ResendCaptainOtp } = userAuth();
   const navigate = useNavigate();
 
-  const onSubmit = async (data) => {
-    console.log("Resend OTP request for:", data);
-  };
+  const onSubmit = async (data) => {};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white text-black">

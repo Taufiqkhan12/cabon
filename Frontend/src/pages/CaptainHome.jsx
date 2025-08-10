@@ -8,13 +8,15 @@ import gsap from "gsap";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
 import userAuth from "../store/UserAuth";
 import { SocketContext } from "../socket/SocketProvider";
+import LiveTracking from "../components/LiveTracking";
 
 const CaptainHome = () => {
   const {
     ridePopUpPanel,
     setRidePopUpPanel,
     confirmRidePopUpPanel,
-    setConfirmRidePopUpPanel,
+    // setConfirmRidePopUpPanel,
+    setRideData,
   } = HomeStore();
 
   const { sendMessage, receiveMessage } = useContext(SocketContext);
@@ -22,8 +24,6 @@ const CaptainHome = () => {
   const { captainAuthData } = userAuth();
   const ridePopUpPanelRef = useRef(null);
   const confirmRidePopUpPanelRef = useRef(null);
-
-  const [data, setData] = useState({});
 
   useEffect(() => {
     sendMessage("join", { userId: captainAuthData?._id, userType: "captain" });
@@ -47,8 +47,7 @@ const CaptainHome = () => {
   }, []);
 
   receiveMessage("new-ride", (data) => {
-    console.log(data);
-    setData(data);
+    setRideData(data);
     setRidePopUpPanel(true);
   });
 
@@ -84,11 +83,14 @@ const CaptainHome = () => {
           className="w-16 absolute left-5 top-5"
         />
         {/* Map Image for temporary use   */}
-        <img
+        {/* <img
           src="https://storage.googleapis.com/support-forums-api/attachment/thread-146048858-12639125651610213305.PNG"
           alt="Map image"
           className="h-1/2 w-full object-cover "
-        />
+        /> */}
+        <div className="w-full h-1/2">
+          <LiveTracking />
+        </div>
         {/* Driver Details  */}
         <div className="h-1/2 w-full bg-white rounded-t-xl overflow-clip flex flex-col items-start justify-start gap-4 p-4">
           <div className="flex items-center justify-between w-full">
@@ -145,7 +147,7 @@ const CaptainHome = () => {
           <h3 className="font-semibold text-xl text-center py-4">
             New Ride Available !
           </h3>
-          <RidePopUp data={data} />
+          <RidePopUp />
         </div>
 
         {/* Confirm Ride Pop up  */}

@@ -1,8 +1,12 @@
 import { MapPin, MapPinLine, MoneyWavy } from "@phosphor-icons/react";
 import HomeStore from "../store/HomeStore";
 
-const RidePopUp = ({ data }) => {
-  const { setRidePopUpPanel, setConfirmRidePopUpPanel } = HomeStore();
+const RidePopUp = () => {
+  const { setRidePopUpPanel, rideData, confirmRide } = HomeStore();
+
+  const handleConfirmRide = async () => {
+    await confirmRide(rideData?._id);
+  };
 
   return (
     <>
@@ -24,19 +28,19 @@ const RidePopUp = ({ data }) => {
               className="w-1/2 object-cover"
             /> */}
             <h2 className="font-semibold text-lg">
-              {data?.user?.fullname?.firstname +
+              {rideData?.user?.fullname?.firstname +
                 " " +
-                data?.user?.fullname?.lastname}
+                rideData?.user?.fullname?.lastname}
             </h2>
           </div>
           <div className="w-[50%] flex items-center justify-end">
             <div className="flex gap-2">
               <p className=" font-medium text-base">
-                {(data?.distance / 1000).toFixed(1)} KM
+                {(rideData?.distance / 1000).toFixed(1)} KM
               </p>
               <span>/</span>
               <p className="font-medium text-base">
-                {(data?.duration / 60).toFixed(0)} Min
+                {(rideData?.duration / 60).toFixed(0)} Min
               </p>
             </div>
           </div>
@@ -45,17 +49,19 @@ const RidePopUp = ({ data }) => {
           {/* Pick-up Address */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
             <MapPin size={24} />
-            <h4 className="text-sm font-semibold ml-2">{data?.pickup}</h4>
+            <h4 className="text-sm font-semibold ml-2">{rideData?.pickup}</h4>
           </div>
           {/* Destination Address */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2">
             <MapPinLine size={24} />
-            <h4 className="text-sm font-semibold ml-2">{data?.destination}</h4>
+            <h4 className="text-sm font-semibold ml-2">
+              {rideData?.destination}
+            </h4>
           </div>
           {/* Price for the ride */}
           <div className="flex items-center justify-start gap-2 border-b border-gray-200 p-2 w-full">
             <MoneyWavy size={24} />
-            <h4 className="text-sm font-semibold ml-2">₹{data?.fare}</h4>
+            <h4 className="text-sm font-semibold ml-2">₹{rideData?.fare}</h4>
           </div>
         </div>
         {/* Buttons for further actions  */}
@@ -68,7 +74,7 @@ const RidePopUp = ({ data }) => {
             Ignore
           </button>
           <button
-            onClick={() => setConfirmRidePopUpPanel(true)}
+            onClick={() => handleConfirmRide()}
             className="bg-green-500 w-full text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-all"
           >
             Accept
