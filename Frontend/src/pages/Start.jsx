@@ -15,7 +15,7 @@ const Start = () => {
             className="text-2xl font-bold
           "
           >
-            Get Started with Uber
+            Get Started with Cabon
           </h2>
           <NavLink
             to="/login"
