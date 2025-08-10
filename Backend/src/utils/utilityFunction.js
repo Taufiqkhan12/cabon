@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
-import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from "./ApiError";
 import dotenv from "dotenv";
 dotenv.config();
 
